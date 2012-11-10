@@ -1,6 +1,7 @@
 from stratum.pubsub import Pubsub, Subscription
 from mining.interfaces import Interfaces
 
+from stratum import settings
 import stratum.logger
 log = stratum.logger.get_logger('subscription')
 
@@ -37,8 +38,7 @@ class MiningSubscription(Subscription):
             return result
         
         # Force set higher difficulty
-        # TODO
-        #self.connection_ref().rpc('mining.set_difficulty', [2,], is_notification=True)
+        self.connection_ref().rpc('mining.set_difficulty', [settings.POOL_TARGET,], is_notification=True)
         #self.connection_ref().rpc('client.get_version', [])
         
         # Force client to remove previous jobs if any (eg. from previous connection)
@@ -52,3 +52,4 @@ class MiningSubscription(Subscription):
         on_finish callback solve the issue that job is broadcasted *during*
         the subscription request and client receive messages in wrong order.'''
         self.connection_ref().on_finish.addCallback(self._finish_after_subscribe)
+
