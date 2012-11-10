@@ -1,6 +1,6 @@
 '''
 This is example configuration for Stratum server.
-Please rename it to settings.py and fill correct values.
+Please rename it to config.py and fill correct values.
 '''
 
 # ******************** GENERAL SETTINGS ***************
@@ -12,7 +12,7 @@ DEBUG = False
 LOGDIR = 'log/'
 
 # Main application log file.
-LOGFILE = None#'stratum.log'
+LOGFILE = None		# eg. 'stratum.log'
 
 # Possible values: DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOGLEVEL = 'INFO'
@@ -20,7 +20,7 @@ LOGLEVEL = 'INFO'
 # How many threads use for synchronous methods (services).
 # 30 is enough for small installation, for real usage
 # it should be slightly more, say 100-300.
-THREAD_POOL_SIZE = 10
+THREAD_POOL_SIZE = 30
 
 ENABLE_EXAMPLE_SERVICE = True
 
@@ -58,17 +58,43 @@ ADMIN_PASSWORD_SHA256 = None
 
 IRC_NICK = None
 
-'''
-DATABASE_DRIVER = 'MySQLdb'
-DATABASE_HOST = 'localhost'
-DATABASE_DBNAME = 'pooldb'
-DATABASE_USER = 'pooldb'
-DATABASE_PASSWORD = '**empty**'
-'''
+# ******************** Database  *********************
 
-# Pool related settings
-INSTANCE_ID = 31
-CENTRAL_WALLET = 'set_valid_addresss_in_config!'
-PREVHASH_REFRESH_INTERVAL = 5 # in sec
-MERKLE_REFRESH_INTERVAL = 60 # How often check memorypool
-COINBASE_EXTRAS = '/stratum/'
+DATABASE_DRIVER = 'sqlite'	# Options: sqlite, postgresql or mysql
+# SQLite
+DB_SQLITE_File = 'pooldb.sqlite'
+# Postgresql
+DB_PGSQL_HOST = 'localhost'
+DB_PGSQL_DBNAME = 'pooldb'
+DB_PGSQL_USER = 'pooldb'
+DB_PGSQL_PASS = '**empty**'
+DB_PGSQL_SCHEMA = 'public'
+# MySQL
+DB_MYSQL_HOST = 'localhost'
+DB_MYSQL_DBNAME = 'pooldb'
+DB_MYSQL_USER = 'pooldb'
+DB_MYSQL_PASS = '**empty**'
+
+# ******************** Pool Settings *********************
+
+# User Auth Options
+USERS_AUTOADD = True		# Automatically add users to db when they connect.
+				# 	This basically disables User Auth for the pool.
+USERS_CHECK_PASSWORD = False	# Check the workers password? (Many pools don't)
+
+# Transaction Settings
+CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local bitcoin address where money goes
+COINBASE_EXTRAS = '/stratumPool/'			# Extra Descriptive String to incorporate in solved blocks
+
+# Pool Target
+POOL_TARGET = 1			# Pool-wide difficulty target int >= 1
+
+# Bitcoind communication polling settings (In Seconds)
+PREVHASH_REFRESH_INTERVAL = 5 	# How often to check for new Blocks
+				#	If using the blocknotify script (recommended) set = to MERKLE_REFRESH_INTERVAL
+				#	(No reason to poll if we're getting pushed notifications)
+MERKLE_REFRESH_INTERVAL = 60	# How often check memorypool
+				#	This effectively resets the template and incorporates new transactions.
+				#	This should be "slow"
+
+INSTANCE_ID = 31		# Not a clue what this is for... :P
