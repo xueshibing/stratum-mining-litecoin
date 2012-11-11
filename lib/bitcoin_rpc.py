@@ -19,6 +19,7 @@ class BitcoinRPC(object):
             'Content-Type': 'text/json',
             'Authorization': 'Basic %s' % self.credentials,
         }
+	client.HTTPClientFactory.noisy = False
         
     def _call_raw(self, data):
         return client.getPage(
