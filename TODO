@@ -9,10 +9,6 @@ Add Database interface in a modular way
 Don't re-invent the wheel.... use m0mchil's code when we can
 	- I didn't fork from there for a reason though Namely different db outlook
 
-Ensure that we can connect to bitcoind AND the it can provide getblocktemplate
-
-Write a Simplified How-to (Since I had a hard time)
-
 Allow auto-adding of usernames OR restrict
 - Add a "script" to add,list,disable users
 
