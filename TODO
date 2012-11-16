@@ -1,17 +1,11 @@
 TODO File (in no particular order):
 
-Add Database interface in a modular way
-- Utilize fifo queue's
-- Allow sqlite database by default
-- Allow mysql database
-	- Use bulk loading
+SQL Connection pooling: sqlalchemy
 
-Don't re-invent the wheel.... use m0mchil's code when we can
-	- I didn't fork from there for a reason though Namely different db outlook
-
-Allow auto-adding of usernames OR restrict
 - Add a "script" to add,list,disable users
 
 Create a "service" (or whatever) that shows pool level stats.
 
+implement a basic share limiter that increases difficulty until share time
+	is X seconds between shares
 

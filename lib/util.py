@@ -142,6 +142,17 @@ def b58decode(v, length):
     
     return result
 
+def b58encode(value):
+    """ encode integer 'value' as a base58 string; returns string
+    """
+    encoded = ''
+    while value >= __b58base:
+        div, mod = divmod(value, __b58base)
+        encoded = __b58chars[mod] + encoded # add to left
+        value = div
+    encoded = __b58chars[value] + encoded # most significant remainder
+    return encoded
+
 def reverse_hash(h):
     # This only revert byte order, nothing more
     if len(h) != 64:

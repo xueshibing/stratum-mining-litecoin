@@ -60,9 +60,11 @@ IRC_NICK = None
 
 # ******************** Database  *********************
 
-DATABASE_DRIVER = 'sqlite'	# Options: sqlite, postgresql or mysql
+DATABASE_DRIVER = 'sqlite'	# Options: none, sqlite, postgresql or mysql
+DATABASE_EXTEND = True		# False = pushpool db layout, True = pushpool + extra columns
+
 # SQLite
-DB_SQLITE_File = 'pooldb.sqlite'
+DB_SQLITE_FILE = 'pooldb.sqlite'
 # Postgresql
 DB_PGSQL_HOST = 'localhost'
 DB_PGSQL_DBNAME = 'pooldb'
@@ -74,6 +76,17 @@ DB_MYSQL_HOST = 'localhost'
 DB_MYSQL_DBNAME = 'pooldb'
 DB_MYSQL_USER = 'pooldb'
 DB_MYSQL_PASS = '**empty**'
+
+# ******************** Adv. DB Settings *********************
+#  Don't change these unless you know what you are doing
+
+DB_LOADER_CHECKTIME = 15	# How often we check to see if we should run the loader
+DB_LOADER_REC_MIN = 10		# Min Records before the bulk loader fires
+DB_LOADER_REC_MAX = 50		# Max Records the bulk loader will commit at a time
+
+DB_STATS_AVG_TIME = 300		# When using the DATABASE_EXTEND option, average speed over X sec
+				#	Note: this is also how often it updates
+DB_USERCACHE_TIME = 600		# How long the usercache is good for before we refresh
 
 # ******************** Pool Settings *********************
 

@@ -58,9 +58,34 @@ Step 4: Adjust pool polling
 
 Database Setup
 =========================
+Table Creation: Tables are auto-created if they don't exist
 
-TODO: Once the DB code exists, Write this.
+None:
+Well, this doesn't do anything, so there is nothing to set up
 
+Sqlite:
+Just set the file path in the config file.
+Support for sqlite3 is built into recent python versions
+
+Postgresql:
+1: Set up your parameters in the config file.
+2: Install the postgresql libraries in your os:
+	Redhat and the like:
+		yum install postgresql-libs postgresql-devel
+	Ubuntu and the like:
+		apt-get install postgresql postgresql-devel
+3: Install the python bindings
+	easy_install psycopg2
+
+Mysql:
+1: Set up your parameters in the config file.
+2: Install the postgresql libraries in your os:
+	Redhat and the like:
+		yum install mysql mysql-devel
+	Ubuntu and the like:
+		apt-get install mysql mysql-devel
+3: Install the python bindings
+	easy_install mysql-python
 
 Problems????
 =========================

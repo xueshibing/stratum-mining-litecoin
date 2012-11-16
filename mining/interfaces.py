@@ -3,12 +3,15 @@
    and customize references to interface instances in your launcher.
    (see launcher_demo.tac for an example).
 ''' 
-
 import time
 from twisted.internet import reactor, defer
+from lib.util import b58encode
 
 import stratum.logger
 log = stratum.logger.get_logger('interfaces')
+
+import DBInterface
+dbi = DBInterface.DBInterface()
 
 class WorkerManagerInterface(object):
     def __init__(self):
@@ -17,7 +20,9 @@ class WorkerManagerInterface(object):
         self.on_load.callback(True)
         
     def authorize(self, worker_name, worker_password):
-        return True
+	# Important NOTE: This is called on EVERY submitted share. So you'll need caching!!!
+	return dbi.check_password(worker_name,worker_password)
+
 
 class ShareLimiterInterface(object):
     '''Implement difficulty adjustments here'''
@@ -29,6 +34,7 @@ class ShareLimiterInterface(object):
            
            - raise SubmitException for stop processing this request
            - call mining.set_difficulty on connection to adjust the difficulty'''
+	
         pass
     
 class ShareManagerInterface(object):
@@ -36,16 +42,22 @@ class ShareManagerInterface(object):
         # Fire deferred when manager is ready
         self.on_load = defer.Deferred()
         self.on_load.callback(True)
+	self.block_height = 0
+	self.prev_hash = 0
 
-    def on_network_block(self, prevhash):
+    def on_network_block(self, prevhash, block_height):
         '''Prints when there's new block coming from the network (possibly new round)'''
+	self.block_height = block_height	
+	self.prev_hash = b58encode(int(prevhash,16))
         pass
     
-    def on_submit_share(self, worker_name, block_header, block_hash, shares, timestamp, is_valid):
+    def on_submit_share(self, worker_name, block_header, block_hash, difficulty, timestamp, is_valid, ip, invalid_reason ):
         log.info("%s %s %s" % (block_hash, 'valid' if is_valid else 'INVALID', worker_name))
-    
-    def on_submit_block(self, is_accepted, worker_name, block_header, block_hash, timestamp):
+	dbi.queue_share([worker_name,block_header,block_hash,difficulty,timestamp,is_valid, ip, self.block_height, self.prev_hash, invalid_reason ])
+ 
+    def on_submit_block(self, is_accepted, worker_name, block_header, block_hash, timestamp, ip ):
         log.info("Block %s %s" % (block_hash, 'ACCEPTED' if is_accepted else 'REJECTED'))
+	dbi.found_block([worker_name,block_header,block_hash,-1,timestamp,is_accepted,ip,self.block_height, self.prev_hash])
     
 class TimestamperInterface(object):
     '''This is the only source for current time in the application.

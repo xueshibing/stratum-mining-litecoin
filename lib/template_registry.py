@@ -61,7 +61,7 @@ class TemplateRegistry(object):
         from last known template.'''
         return self.last_block.broadcast_args
         
-    def add_template(self, block):
+    def add_template(self, block,block_height):
         '''Adds new template to the registry.
         It also clean up templates which should
         not be used anymore.'''
@@ -94,7 +94,7 @@ class TemplateRegistry(object):
         if new_block:
             # Tell the system about new block
             # It is mostly important for share manager
-            self.on_block_callback(prevhash)
+            self.on_block_callback(prevhash, block_height)
 
         # Everything is ready, let's broadcast jobs!
         self.on_template_callback(new_block)
@@ -127,7 +127,7 @@ class TemplateRegistry(object):
                 
         template = self.block_template_class(Interfaces.timestamper, self.coinbaser, JobIdGenerator.get_new_id())
         template.fill_from_rpc(data)
-        self.add_template(template)
+        self.add_template(template,data['height'])
 
         log.info("Update finished, %.03f sec, %d txes" % \
                     (Interfaces.timestamper.time() - start, len(template.vtx)))

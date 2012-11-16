@@ -1,6 +1,7 @@
 import binascii
 from twisted.internet import defer
 
+from stratum import settings
 from stratum.services import GenericService, admin
 from stratum.pubsub import Pubsub
 from interfaces import Interfaces
@@ -56,7 +57,7 @@ class MiningService(GenericService):
         
         session = self.connection_ref().get_session()
         session['extranonce1'] = extranonce1
-        session['difficulty'] = 1 # Following protocol specs, default diff is 1
+        session['difficulty'] = settings.POOL_TARGET # Following protocol specs, default diff is 1
 
         return Pubsub.subscribe(self.connection_ref(), MiningSubscription()) + (extranonce1_hex, extranonce2_size)
     
@@ -93,6 +94,7 @@ class MiningService(GenericService):
         
         difficulty = session['difficulty']
         submit_time = Interfaces.timestamper.time()
+        ip = self.connection_ref()._get_ip()
     
         Interfaces.share_limiter.submit(self.connection_ref, difficulty, submit_time)
             
@@ -101,21 +103,21 @@ class MiningService(GenericService):
         try:
             (block_header, block_hash, on_submit) = Interfaces.template_registry.submit_share(job_id,
                                                 worker_name, extranonce1_bin, extranonce2, ntime, nonce, difficulty)
-        except SubmitException:
+        except SubmitException as e:
             # block_header and block_hash are None when submitted data are corrupted
             Interfaces.share_manager.on_submit_share(worker_name, None, None, difficulty,
-                                                 submit_time, False)    
+                                                 submit_time, False, ip, e[0])    
             raise
             
              
         Interfaces.share_manager.on_submit_share(worker_name, block_header, block_hash, difficulty,
-                                                 submit_time, True)
+                                                 submit_time, True, ip, '')
         
         if on_submit != None:
             # Pool performs submitblock() to bitcoind. Let's hook
             # to result and report it to share manager
             on_submit.addCallback(Interfaces.share_manager.on_submit_block,
-                        worker_name, block_header, block_hash, submit_time)
+                        worker_name, block_header, block_hash, submit_time,ip)
 
         return True
             
