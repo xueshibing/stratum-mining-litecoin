@@ -15,8 +15,9 @@ class DB_Mysql():
 
     def updateStats(self,averageOverTime):
 	log.debug("Updating Stats")
+	# Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
+	self.dbc.execute("update pool_worker set speed = 0");
 	stime = '%.2f' % ( time.time() - averageOverTime );
-#	self.dbc.execute("select username,SUM(difficulty) from shares where time > %(time)s group by username", {"time": (stime,)})
 	self.dbc.execute("select username,SUM(difficulty) from shares where time > FROM_UNIXTIME(%s) group by username", (stime,))
 	for name,shares in self.dbc.fetchall():
 	    speed = int(int(shares) * pow(2,32)) / ( int(averageOverTime) * 1000 * 1000)
