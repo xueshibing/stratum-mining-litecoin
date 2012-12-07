@@ -95,10 +95,11 @@ class StatsPage(Resource):
 	else :
 	    colcnt = int(size/3) + 1
 	    colt = colcnt
-	    r+="<tr><td width=33%>"
+	    r+="<tr><td width=33% valign=top>"
 	    r+="<table width=100% vspace=0 hspace=0 cellpadding=1 cellspacing=0>"
 	    r+="<tr><td>Worker</td><td>Speed</td><td>Shares/Rej</td><td>Found</td></tr>"
-	    for (w, wd) in enumerate(workers_stats):
+	    for (w, wi) in enumerate(workers_stats):
+		wd = workers_stats[wi]
 		wc = "#A00"
 		if wd["speed"] > 0:
 		    wc = "yellow"
@@ -108,9 +109,10 @@ class StatsPage(Resource):
 			wc,wi,format(int(wd["speed"]),"n"),format(int(wd["total_shares"]),"n"),format(int(wd["total_rejects"]),"n"),format(int(wd["total_found"]),"n"))
 		colt = colt - 1
 		if colt <= 0:
-	    	    r+="</table></td><td width=33%>"
+	    	    r+="</table></td><td width=33% valign=top>"
 	    	    r+="<table width=100% vspace=0 hspace=0 cellpadding=1 cellspacing=0>"
 		    r+="<tr><td>Worker</td><td>Speed</td><td>Shares/Rej</td><td>Found</td></tr>"
+		    colt = colcnt
 	    r+="</table></td></tr>"
 	r+="</table></body></html>"
 	self.cache_html = str(r)
