@@ -16,3 +16,6 @@ See the INSTALL file for install instructions.
 For more info on Stratum:
 http://mining.bitcoin.cz/stratum-mining.
 
+Original version by Slush
+
+This version by GeneralFault (Tips Welcome: 15Zk7DoFYJ7hESpZzmix1WLkomTMGW81c2 )

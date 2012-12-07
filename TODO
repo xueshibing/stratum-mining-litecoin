@@ -1,11 +1,17 @@
 TODO File (in no particular order):
 
 SQL Connection pooling: sqlalchemy
+Share Archiving in DB
+	- Perhaps separate table for found shares?
 
-- Add a "script" to add,list,disable users
+Add a "script" to add,list,disable users
 
-Create a "service" (or whatever) that shows pool level stats.
-
-implement a basic share limiter that increases difficulty until share time
+Implement a basic share limiter that increases difficulty until share time
 	is X seconds between shares
+
+Flush all Pending shares on shutdown (I really don't know how to do this.)
+
+Figure out "Best" submitted difficulty
+
+Handle bitcoind going away (Make sure stats reflect problems)
 

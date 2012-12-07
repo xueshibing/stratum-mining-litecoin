@@ -20,10 +20,13 @@ class DB_Postgresql():
 	# Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
 	self.dbc.execute("update pool_worker set speed = 0");
 	stime = '%.2f' % ( time.time() - averageOverTime );
-	self.dbc.execute("select username,SUM(difficulty) from shares where time > to_timestamp(%s) group by username", (stime,))
+	self.dbc.execute("select username,SUM(difficulty) from shares where time > to_timestamp(%s) group by username", [stime])
+	total_speed = 0
 	for name,shares in self.dbc.fetchall():
 	    speed = int(int(shares) * pow(2,32)) / ( int(averageOverTime) * 1000 * 1000)
+	    total_speed += speed
 	    self.dbc.execute("update pool_worker set speed = %s where username = %s", (speed,name))
+	self.dbc.execute("update pool set value = %s where parameter = 'pool_speed'",[total_speed])
 	self.dbh.commit()
 
     def import_shares(self,data):
@@ -31,25 +34,44 @@ class DB_Postgresql():
 #	       0           1            2          3          4         5        6  7            8         9
 #	data: [worker_name,block_header,block_hash,difficulty,timestamp,is_valid,ip,block_height,prev_hash,invalid_reason]
 	checkin_times = {}
+	total_shares = 0
 	for k,v in enumerate(data):
 	    if settings.DATABASE_EXTEND :
+		total_shares += v[3]
 		if v[0] in checkin_times:
 		    if v[4] > checkin_times[v[0]] :
-			checkin_times[v[0]] = v[4]
+			checkin_times[v[0]]["time"] = v[4]
 		else:
-		    checkin_times[v[0]] = v[4]
+		    checkin_times[v[0]] = {"time": v[4], "shares": 0, "rejects": 0 }
+
+		if v[5] == True :
+		    checkin_times[v[0]]["shares"] += v[3]
+		else :
+		    checkin_times[v[0]]["rejects"] += v[3]
 
 		self.dbc.execute("insert into shares " +\
 			"(time,rem_host,username,our_result,upstream_result,reason,solution,block_num,prev_block_hash,useragent,difficulty) " +\
 			"VALUES (to_timestamp(%s),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-			(v[4],v[6],v[0],v[5],0,v[9],'',v[7],v[8],'',v[3]) )
+			(v[4],v[6],v[0],bool(v[5]),False,v[9],'',v[7],v[8],'',v[3]) )
 	    else :
 		self.dbc.execute("insert into shares (time,rem_host,username,our_result,upstream_result,reason,solution) VALUES " +\
 			"(to_timestamp(%s),%s,%s,%s,%s,%s,%s)",
-			(v[4],v[6],v[0],v[5],0,v[9],'') )
+			(v[4],v[6],v[0],bool(v[5]),False,v[9],'') )
+
 	if settings.DATABASE_EXTEND :
+	    self.dbc.execute("select value from pool where parameter = 'round_shares'")
+	    round_shares = int(self.dbc.fetchone()[0]) + total_shares
+	    self.dbc.execute("update pool set value = %s where parameter = 'round_shares'",[round_shares])
+
+	    self.dbc.execute("select value from pool where parameter = 'bitcoin_difficulty'")
+	    difficulty = float(self.dbc.fetchone()[0])
+
+	    progress = (round_shares/difficulty)*100
+	    self.dbc.execute("update pool set value = %s where parameter = 'round_progress'",[progress])
+	
 	    for k,v in checkin_times.items():
-		self.dbc.execute("update pool_worker set last_checkin = to_timestamp(%s) where username = %s",(v,k))
+		self.dbc.execute("update pool_worker set last_checkin = to_timestamp(%s), total_shares = total_shares + %s, total_rejects = total_rejects + %s where username = %s",
+			(v["time"],v["shares"],v["rejects"],k))
 
 	self.dbh.commit()
 
@@ -57,7 +79,17 @@ class DB_Postgresql():
     def found_block(self,data):
 	# Note: difficulty = -1 here
 	self.dbc.execute("update shares set upstream_result = %s, solution = %s where time = %s and username = %s",
-		(data[5],data[2],data[4],data[0]))
+		(bool(data[5]),data[2],data[4],data[0]))
+	if settings.DATABASE_EXTEND :
+	    if data[5] == True:
+	    	self.dbc.execute("update pool_worker set total_found = total_found + 1 where username = %s",(data[0]))
+	    self.dbc.execute("select value from pool where parameter = 'pool_total_found'")
+	    total_found = int(self.dbc.fetchone()[0]) + 1
+	    self.dbc.executemany("update pool set value = %s where paramter = %s",[(0,'round_shares'),
+		(0,'round_progress'),
+		(time.time(),'round_start'),
+		([total_found],'pool_total_found')
+		])
 	self.dbh.commit()
 
     def delete_user(self,username):
@@ -87,6 +119,33 @@ class DB_Postgresql():
 	    return True
 	return False
 
+    def update_pool_info(self,pi):
+	self.dbc.executemany("update pool set value = %s where parameter = %s",[(pi['blocks'],"bitcoin_blocks"),
+		(pi['balance'],"bitcoin_balance"),
+		(pi['connections'],"bitcoin_connections"),
+		(pi['difficulty'],"bitcoin_difficulty")
+		])
+	self.dbh.commit()
+
+    def get_pool_stats(self):
+	self.dbc.execute("select * from pool")
+	ret = {}
+	for data in self.dbc.fetchall():
+	    ret[data[0]] = data[1]
+	return ret
+
+    def get_workers_stats(self):
+	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found from pool_worker")
+	ret = {}
+	for data in self.dbc.fetchall():
+	    ret[data[0]] = { "username" : data[0],
+		"speed" : data[1],
+		"last_checkin" : time.mktime(data[2].timetuple()),
+		"total_shares" : data[3],
+		"total_rejects" : data[4],
+		"total_found" : data[5] }
+	return ret
+
     def check_tables(self):
 	log.debug("Checking Tables")
 
@@ -103,6 +162,13 @@ class DB_Postgresql():
 	data = self.dbc.fetchone()
 	if data[0] > 0 :
 	    pool_worker_exist = True
+	
+	pool_exist = False
+	self.dbc.execute("select COUNT(*) from pg_catalog.pg_tables where schemaname = %(schema)s and tablename = 'pool'", 
+		{"schema": settings.DB_PGSQL_SCHEMA })
+	data = self.dbc.fetchone()
+	if data[0] > 0 :
+	    pool_exist = True
 
 	if settings.DATABASE_EXTEND == True :
 	    if shares_exist == False:
@@ -111,15 +177,50 @@ class DB_Postgresql():
 			"block_num INTEGER, prev_block_hash TEXT, useragent TEXT, difficulty INTEGER)")
 		self.dbc.execute("create index shares_username ON shares(username)")
 	    if pool_worker_exist == False:
-		self.dbc.execute("create table pool_worker(id serial primary key,username TEXT, password TEXT, speed INTEGER, last_checkin timestamp)")
+		self.dbc.execute("create table pool_worker" +\
+			"(id serial primary key,username TEXT, password TEXT, speed INTEGER, last_checkin timestamp)")
 		self.dbc.execute("create index pool_worker_username ON pool_worker(username)")
+	    if pool_exist == False:
+		self.dbc.execute("alter table pool_worker add total_shares INTEGER default 0")
+		self.dbc.execute("alter table pool_worker add total_rejects INTEGER default 0")
+		self.dbc.execute("alter table pool_worker add total_found INTEGER default 0")
+		self.dbc.execute("create table pool(parameter TEXT, value TEXT)")
+		self.dbc.execute("insert into pool (parameter,value) VALUES ('DB Version',2)")
+	    self.update_tables()
 	else :
 	    if shares_exist == False:
 		self.dbc.execute("create table shares" + \
-			"(id serial,time timestamp,rem_host TEXT, username TEXT, our_result INTEGER, upstream_result INTEGER, reason TEXT, solution TEXT)")
+			"(id serial,time timestamp,rem_host TEXT, username TEXT, our_result BOOLEAN, upstream_result BOOLEAN, reason TEXT, solution TEXT)")
 		self.dbc.execute("create index shares_username ON shares(username)")
 	    if pool_worker_exist == False:
 		self.dbc.execute("create table pool_worker(id serial,username TEXT, password TEXT)")
 		self.dbc.execute("create index pool_worker_username ON pool_worker(username)")
+	self.dbh.commit()
+	
+    def update_tables(self):
+	version = 0
+	current_version = 3
+	while version < current_version :
+	    self.dbc.execute("select value from pool where parameter = 'DB Version'")
+	    data = self.dbc.fetchone()
+	    version = int(data[0])
+	    if version < current_version :
+		log.info("Updating Database from %i to %i" % (version, version +1))
+		getattr(self, 'update_version_' + str(version) )()
+		    
+
+    def update_version_2(self):
+	log.info("running update 2")
+	self.dbc.executemany("insert into pool (parameter,value) VALUES (%s,%s)",[('bitcoin_blocks',0),
+		('bitcoin_balance',0),
+		('bitcoin_connections',0),
+		('bitcoin_difficulty',0),
+		('pool_speed',0),
+		('pool_total_found',0),
+		('round_shares',0),
+		('round_progress',0),
+		('round_start',time.time())
+		])
+	self.dbc.execute("update pool set value = 3 where parameter = 'DB Version'")
 	self.dbh.commit()
 	

@@ -21,6 +21,9 @@ class DBInterface():
 
         self.scheduleImport()
 
+    def set_bitcoinrpc(self,bitcoinrpc):
+	self.bitcoinrpc=bitcoinrpc
+
     def connectDB(self):
 	# Choose our database driver and put it in self.dbi
 	if settings.DATABASE_DRIVER == "sqlite":
@@ -64,6 +67,8 @@ class DBInterface():
 	self.do_import(self.dbi)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
+            d = self.bitcoinrpc.getinfo()
+            d.addCallback(self._update_pool_info)
 	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
 	self.scheduleImport()
 
@@ -73,7 +78,13 @@ class DBInterface():
 	self.do_import(dbi)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
+            d = self.bitcoinrpc.getinfo()
+            d.addCallback(self._update_pool_info)
 	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
+
+    def _update_pool_info(self,data):
+	self.dbi.update_pool_info({ 'blocks' : data['blocks'], 'balance' : data['balance'], 
+		'connections' : data['connections'], 'difficulty' : data['difficulty'] })
 
     def do_import(self,dbi):
 	# Only run if we have data
@@ -130,3 +141,8 @@ class DBInterface():
 	self.usercache = {}
 	return self.dbi.update_user(username,password)
 
+    def get_pool_stats(self):
+	return self.dbi.get_pool_stats()
+    
+    def get_workers_stats(self):
+	return self.dbi.get_workers_stats()

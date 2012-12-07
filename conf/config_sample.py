@@ -111,3 +111,13 @@ MERKLE_REFRESH_INTERVAL = 60	# How often check memorypool
 				#	This should be "slow"
 
 INSTANCE_ID = 31		# Not a clue what this is for... :P
+
+# ******************** Pool Settings *********************
+
+BASIC_STATS = True		# Enable basic stats page. This has stats for ALL users.
+				#   (Requires advanced database to be enabled)
+				#	Human : http://<hostname>:<BASIC_STATS_PORT>/
+				#	JSON  : http://<hostname>:<BASIC_STATS_PORT>/stats
+				#   (Disable if you have your own frontend)
+
+BASIC_STATS_PORT = 8889		# Port to listen on

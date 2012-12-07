@@ -26,6 +26,19 @@ class DB_None():
     def check_password(self,username,password):
 	log.debug("Checking Username/Password")
 	return True
+    
+    def update_pool_info(self,pi):
+	log.debug("Update Pool Info")
+
+    def get_pool_stats(self):
+	log.debug("Get Pool Stats")
+	ret = {}
+	return ret
+
+    def get_workers_stats(self):
+	log.debug("Get Workers Stats")
+	ret = {}
+	return ret
 
     def check_tables(self):
 	log.debug("Checking Tables")
