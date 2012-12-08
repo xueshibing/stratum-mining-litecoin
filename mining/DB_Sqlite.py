@@ -4,8 +4,6 @@ import stratum.logger
 log = stratum.logger.get_logger('DB_Sqlite')
 
 import sqlite3
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
                
 class DB_Sqlite():
     def __init__(self):
