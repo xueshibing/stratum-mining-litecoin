@@ -16,23 +16,24 @@ class DB_Mysql():
     def updateStats(self,averageOverTime):
 	log.debug("Updating Stats")
 	# Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
-	self.dbc.execute("update pool_worker set speed = 0");
+	self.dbc.execute("update pool_worker set speed = 0, alive = 0");
 	stime = '%.0f' % ( time.time() - averageOverTime );
 	self.dbc.execute("select username,SUM(difficulty) from shares where time > FROM_UNIXTIME(%s) group by username", (stime,))
 	total_speed = 0
 	for name,shares in self.dbc.fetchall():
 	    speed = int(int(shares) * pow(2,32)) / ( int(averageOverTime) * 1000 * 1000)
 	    total_speed += speed
-	    self.dbc.execute("update pool_worker set speed = %s where username = %s", (speed,name))
+	    self.dbc.execute("update pool_worker set speed = %s, alive = 1 where username = %s", (speed,name))
 	self.dbc.execute("update pool set value = %s where parameter = 'pool_speed'",[total_speed])
 	self.dbh.commit()
 
     def import_shares(self,data):
 	log.debug("Importing Shares")
-#	       0           1            2          3          4         5        6  7            8         9
-#	data: [worker_name,block_header,block_hash,difficulty,timestamp,is_valid,ip,block_height,prev_hash,invalid_reason]
+#	       0           1            2          3          4         5        6  7            8         9              10
+#	data: [worker_name,block_header,block_hash,difficulty,timestamp,is_valid,ip,block_height,prev_hash,invalid_reason,best_diff]
 	checkin_times = {}
 	total_shares = 0
+	best_diff = 0
 	for k,v in enumerate(data):
 	    if settings.DATABASE_EXTEND :
 		total_shares += v[3]
@@ -47,6 +48,9 @@ class DB_Mysql():
 		else :
 		    checkin_times[v[0]]["rejects"] += v[3]
 
+		if v[10] > best_diff:
+		    best_diff = v[10]
+
 		self.dbc.execute("insert into shares " +\
 			"(time,rem_host,username,our_result,upstream_result,reason,solution,block_num,prev_block_hash,useragent,difficulty) " +\
 			"VALUES (FROM_UNIXTIME(%s),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
@@ -60,6 +64,11 @@ class DB_Mysql():
 	    self.dbc.execute("select value from pool where parameter = 'round_shares'")
 	    round_shares = int(self.dbc.fetchone()[0]) + total_shares
 	    self.dbc.execute("update pool set value = %s where parameter = 'round_shares'",[round_shares])
+
+	    self.dbc.execute("select value from pool where parameter = 'round_best_share'")
+	    round_best_share = int(self.dbc.fetchone()[0])
+	    if best_diff > round_best_share:
+		self.dbc.execute("update pool set value = %s where parameter = 'round_best_share'",[best_diff])
 
 	    self.dbc.execute("select value from pool where parameter = 'bitcoin_difficulty'")
 	    difficulty = float(self.dbc.fetchone()[0])
@@ -121,7 +130,8 @@ class DB_Mysql():
 	self.dbc.executemany("update pool set value = %s where parameter = %s",[(pi['blocks'],"bitcoin_blocks"),
 		(pi['balance'],"bitcoin_balance"),
 		(pi['connections'],"bitcoin_connections"),
-		(pi['difficulty'],"bitcoin_difficulty")
+		(pi['difficulty'],"bitcoin_difficulty"),
+		(time.time(),"bitcoin_infotime")
 		])
 	self.dbh.commit()
 
@@ -133,7 +143,7 @@ class DB_Mysql():
 	return ret
 
     def get_workers_stats(self):
-	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found from pool_worker")
+	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found,alive from pool_worker")
 	ret = {}
 	for data in self.dbc.fetchall():
 	    ret[data[0]] = { "username" : data[0],
@@ -141,7 +151,8 @@ class DB_Mysql():
 		"last_checkin" : time.mktime(data[2].timetuple()),
 		"total_shares" : data[3],
 		"total_rejects" : data[4],
-		"total_found" : data[5] }
+		"total_found" : data[5],
+		"alive" : data[6] }
 	return ret
 
     def check_tables(self):
@@ -196,7 +207,7 @@ class DB_Mysql():
 	
     def update_tables(self):
 	version = 0
-	current_version = 3
+	current_version = 4
 	while version < current_version :
 	    self.dbc.execute("select value from pool where parameter = 'DB Version'")
 	    data = self.dbc.fetchone()
@@ -219,5 +230,15 @@ class DB_Mysql():
 		('round_start',time.time())
 		])
 	self.dbc.execute("update pool set value = 3 where parameter = 'DB Version'")
+	self.dbh.commit()
+	
+    def update_version_3(self):
+	log.info("running update 3")
+	self.dbc.executemany("insert into pool (parameter,value) VALUES (%s,%s)",[
+		('round_best_share',0),
+		('bitcoin_infotime',0)
+		])
+	self.dbc.execute("alter table pool_worker add alive BOOLEAN")
+	self.dbc.execute("update pool set value = 4 where parameter = 'DB Version'")
 	self.dbh.commit()
 	

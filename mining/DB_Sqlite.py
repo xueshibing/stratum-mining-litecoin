@@ -16,7 +16,7 @@ class DB_Sqlite():
     def updateStats(self,averageOverTime):
 	log.debug("Updating Stats")
 	# Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
-	self.dbc.execute("update pool_worker set speed = 0");
+	self.dbc.execute("update pool_worker set speed = 0, alive = 0");
 	stime = '%.2f' % ( time.time() - averageOverTime );
 	self.dbc.execute("select username,SUM(difficulty) from shares where time > :time group by username", {'time':stime})
 	total_speed = 0
@@ -25,16 +25,17 @@ class DB_Sqlite():
 	    speed = int(int(shares) * pow(2,32)) / ( int(averageOverTime) * 1000 * 1000)
 	    total_speed += speed
 	    sqldata.append({'speed':speed,'user':name})
-	self.dbc.executemany("update pool_worker set speed = :speed where username = :user",sqldata)
+	self.dbc.executemany("update pool_worker set speed = :speed, alive = 1 where username = :user",sqldata)
 	self.dbc.execute("update pool set value = :val where parameter = 'pool_speed'",{'val':total_speed})
 	self.dbh.commit()
 
     def import_shares(self,data):
 	log.debug("Importing Shares")
-#	       0           1            2          3          4         5        6  7            8         9
-#	data: [worker_name,block_header,block_hash,difficulty,timestamp,is_valid,ip,block_height,prev_hash,invalid_reason]
+#	       0           1            2          3          4         5        6  7            8         9              10
+#	data: [worker_name,block_header,block_hash,difficulty,timestamp,is_valid,ip,block_height,prev_hash,invalid_reason,share_diff]
 	checkin_times = {}
 	total_shares = 0
+	best_diff = 0
 	sqldata = []
 	for k,v in enumerate(data):
 	    if settings.DATABASE_EXTEND :
@@ -50,6 +51,9 @@ class DB_Sqlite():
 		else :
 		    checkin_times[v[0]]["rejects"] += v[3]
 
+		if v[10] > best_diff:
+		    best_diff = v[10]
+
 		sqldata.append({'time':v[4],'rem_host':v[6],'username':v[0],'our_result':v[5],'upstream_result':0,'reason':v[9],'solution':'',
 			'block_num':v[7],'prev_block_hash':v[8],'ua':'','diff':v[3]} )
 	    else :
@@ -64,6 +68,11 @@ class DB_Sqlite():
 	    self.dbc.execute("select value from pool where parameter = 'round_shares'")
 	    round_shares = int(self.dbc.fetchone()[0]) + total_shares
 	    self.dbc.execute("update pool set value = :val where parameter = 'round_shares'",{'val':round_shares})
+
+	    self.dbc.execute("select value from pool where parameter = 'round_best_share'")
+	    round_best_share = int(self.dbc.fetchone()[0])
+	    if best_diff > round_best_share:
+		self.dbc.execute("update pool set value = :val where parameter = 'round_best_share'",{'val':best_diff})
 
 	    self.dbc.execute("select value from pool where parameter = 'bitcoin_difficulty'")
 	    difficulty = float(self.dbc.fetchone()[0])
@@ -125,7 +134,8 @@ class DB_Sqlite():
 	self.dbc.executemany("update pool set value = :val where parameter = :parm",[{'val':pi['blocks'],'parm':"bitcoin_blocks"},
 		{'val':pi['balance'],'parm':"bitcoin_balance"},
 		{'val':pi['connections'],'parm':"bitcoin_connections"},
-		{'val':pi['difficulty'],'parm':"bitcoin_difficulty"}
+		{'val':pi['difficulty'],'parm':"bitcoin_difficulty"},
+		{'val':time.time(),'parm':"bitcoin_infotime"}
 		])
 	self.dbh.commit()
 
@@ -137,7 +147,7 @@ class DB_Sqlite():
 	return ret
 
     def get_workers_stats(self):
-	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found from pool_worker")
+	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found,alive from pool_worker")
 	ret = {}
 	for data in self.dbc.fetchall():
 	    ret[data[0]] = { "username" : data[0],
@@ -145,7 +155,8 @@ class DB_Sqlite():
 		"last_checkin" : data[2],
 		"total_shares" : data[3],
 		"total_rejects" : data[4],
-		"total_found" : data[5] }
+		"total_found" : data[5],
+		"alive" : data[6] }
 	return ret
 
     def check_tables(self):
@@ -175,7 +186,7 @@ class DB_Sqlite():
 
     def update_tables(self):
 	version = 0
-	current_version = 3
+	current_version = 4
 	while version < current_version :
 	    self.dbc.execute("select value from pool where parameter = 'DB Version'")
 	    data = self.dbc.fetchone()
@@ -198,5 +209,15 @@ class DB_Sqlite():
 		('round_start',time.time())
 		])
 	self.dbc.execute("update pool set value = 3 where parameter = 'DB Version'")
+	self.dbh.commit()
+    
+    def update_version_3(self):
+	log.info("running update 3")
+	self.dbc.executemany("insert into pool (parameter,value) VALUES (?,?)",[
+		('round_best_share',0),
+		('bitcoin_infotime',0),
+		])
+	self.dbc.execute("alter table pool_worker add alive INTEGER default 0")
+	self.dbc.execute("update pool set value = 4 where parameter = 'DB Version'")
 	self.dbh.commit()
 	

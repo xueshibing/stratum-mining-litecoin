@@ -51,13 +51,14 @@ class ShareManagerInterface(object):
 	self.prev_hash = b58encode(int(prevhash,16))
         pass
     
-    def on_submit_share(self, worker_name, block_header, block_hash, difficulty, timestamp, is_valid, ip, invalid_reason ):
-        log.info("%s %s %s" % (block_hash, 'valid' if is_valid else 'INVALID', worker_name))
-	dbi.queue_share([worker_name,block_header,block_hash,difficulty,timestamp,is_valid, ip, self.block_height, self.prev_hash, invalid_reason ])
+    def on_submit_share(self, worker_name, block_header, block_hash, difficulty, timestamp, is_valid, ip, invalid_reason, share_diff ):
+        log.info("%s (%s) %s %s" % (block_hash, share_diff, 'valid' if is_valid else 'INVALID', worker_name))
+	dbi.queue_share([worker_name,block_header,block_hash,difficulty,timestamp,is_valid, ip, self.block_height, self.prev_hash, 
+		invalid_reason, share_diff ])
  
-    def on_submit_block(self, is_accepted, worker_name, block_header, block_hash, timestamp, ip ):
+    def on_submit_block(self, is_accepted, worker_name, block_header, block_hash, timestamp, ip, share_diff ):
         log.info("Block %s %s" % (block_hash, 'ACCEPTED' if is_accepted else 'REJECTED'))
-	dbi.found_block([worker_name,block_header,block_hash,-1,timestamp,is_accepted,ip,self.block_height, self.prev_hash])
+	dbi.found_block([worker_name,block_header,block_hash,-1,timestamp,is_accepted,ip,self.block_height, self.prev_hash, share_diff ])
     
 class TimestamperInterface(object):
     '''This is the only source for current time in the application.

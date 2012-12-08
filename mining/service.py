@@ -101,23 +101,23 @@ class MiningService(GenericService):
         # This checks if submitted share meet all requirements
         # and it is valid proof of work.
         try:
-            (block_header, block_hash, on_submit) = Interfaces.template_registry.submit_share(job_id,
+            (block_header, block_hash, share_diff, on_submit) = Interfaces.template_registry.submit_share(job_id,
                                                 worker_name, extranonce1_bin, extranonce2, ntime, nonce, difficulty)
         except SubmitException as e:
             # block_header and block_hash are None when submitted data are corrupted
             Interfaces.share_manager.on_submit_share(worker_name, None, None, difficulty,
-                                                 submit_time, False, ip, e[0])    
+                                                 submit_time, False, ip, e[0], share_diff)    
             raise
             
              
         Interfaces.share_manager.on_submit_share(worker_name, block_header, block_hash, difficulty,
-                                                 submit_time, True, ip, '')
+                                                 submit_time, True, ip, '', share_diff)
         
         if on_submit != None:
             # Pool performs submitblock() to bitcoind. Let's hook
             # to result and report it to share manager
             on_submit.addCallback(Interfaces.share_manager.on_submit_block,
-                        worker_name, block_header, block_hash, submit_time,ip)
+                        worker_name, block_header, block_hash, submit_time,ip,share_diff)
 
         return True
             

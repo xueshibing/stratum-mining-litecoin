@@ -233,6 +233,9 @@ class TemplateRegistry(object):
         if hash_int <= target_info:
             log.info("Yay, share with diff above 100000")
 
+	# Algebra tells us the diff_to_target is the same as hash_to_diff
+	share_diff = int(self.diff_to_target(hash_int))
+
         # 5. Compare hash with target of the network        
         if hash_int <= job.target:
             # Yay! It is block candidate! 
@@ -249,6 +252,6 @@ class TemplateRegistry(object):
             serialized = binascii.hexlify(job.serialize())
             on_submit = self.bitcoin_rpc.submitblock(serialized)
             
-            return (header_hex, block_hash_hex, on_submit)
+            return (header_hex, block_hash_hex, share_diff, on_submit)
         
-        return (header_hex, block_hash_hex, None)
+        return (header_hex, block_hash_hex, share_diff, None)

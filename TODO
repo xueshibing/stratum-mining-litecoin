@@ -11,7 +11,3 @@ Implement a basic share limiter that increases difficulty until share time
 
 Flush all Pending shares on shutdown (I really don't know how to do this.)
 
-Figure out "Best" submitted difficulty
-
-Handle bitcoind going away (Make sure stats reflect problems)
-

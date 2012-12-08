@@ -59,19 +59,22 @@ class StatsPage(Resource):
 	r+="</td><td>Speed: " + pool_stats['pool_speed'] + "Mhs"
 	r+="</td><td>Round Shares: " + format(int(pool_stats['round_shares']),"n") + " (%.2f" % float(pool_stats['round_progress']) + "%)"
 	r+="</td><td>Round Duration: " + str(timedelta(0,(time.time() - float(pool_stats['round_start'])))).split(".")[0]
+	r+="</td><td>Best Share: " + format(int(pool_stats['round_best_share']),"n")
 	r+="</td><td>Total Found: " + format(int(pool_stats['pool_total_found']),"n")
 	r+="</td></tr>"
 
+	last_update = time.time() - float(pool_stats['bitcoin_infotime'])
 	bitcoin_color="#A00"
-	if int(pool_stats['bitcoin_connections']) > 0:
+	if int(pool_stats['bitcoin_connections']) > 0 and last_update < 660:
 	    bitcoin_color="yellow"
-	if int(pool_stats['bitcoin_connections']) > 10:
+	if int(pool_stats['bitcoin_connections']) > 10 and last_update < 330:
 	    bitcoin_color="#0A0"
 	r+="<tr bgcolor=\""+bitcoin_color+"\"><td><b>Bitcoin Stats:</b>"
 	r+="</td><td>Connections :"+pool_stats['bitcoin_connections']
 	r+="</td><td>Difficulty :"+format(int(float(pool_stats['bitcoin_difficulty'])),"n")
 	r+="</td><td>Height :"+format(int(pool_stats['bitcoin_blocks']),"n")
 	r+="</td><td>Balance :"+pool_stats['bitcoin_balance']
+	r+="</td><td>"
 	r+="</td></tr></table>"
 
 	r+="<br>"
