@@ -99,9 +99,6 @@ USERS_CHECK_PASSWORD = False	# Check the workers password? (Many pools don't)
 CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local bitcoin address where money goes
 COINBASE_EXTRAS = '/stratumPool/'			# Extra Descriptive String to incorporate in solved blocks
 
-# Pool Target
-POOL_TARGET = 1			# Pool-wide difficulty target int >= 1
-
 # Bitcoind communication polling settings (In Seconds)
 PREVHASH_REFRESH_INTERVAL = 5 	# How often to check for new Blocks
 				#	If using the blocknotify script (recommended) set = to MERKLE_REFRESH_INTERVAL
@@ -112,7 +109,21 @@ MERKLE_REFRESH_INTERVAL = 60	# How often check memorypool
 
 INSTANCE_ID = 31		# Not a clue what this is for... :P
 
-# ******************** Pool Settings *********************
+# ******************** Pool Difficulty Settings *********************
+#  Again, Don't change unless you know what this is for.
+
+# Pool Target (Base Difficulty)
+POOL_TARGET = 1			# Pool-wide difficulty target int >= 1
+
+# Variable Difficulty Enable
+VARIABLE_DIFF = False		# Master variable difficulty enable
+
+# Variable diff tuning variables
+VDIFF_TARGET = 30		# Target time per share (i.e. try to get 1 share per this many seconds)
+VDIFF_RETARGET = 300		# Check to see if we should retarget this often
+VDIFF_VARIANCE_PERCENT = 50	# Allow average time to very this % from target without retarget
+
+# ******************** Stats Settings *********************
 
 BASIC_STATS = True		# Enable basic stats page. This has stats for ALL users.
 				#   (Requires advanced database to be enabled)

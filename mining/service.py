@@ -96,7 +96,7 @@ class MiningService(GenericService):
         submit_time = Interfaces.timestamper.time()
         ip = self.connection_ref()._get_ip()
     
-        Interfaces.share_limiter.submit(self.connection_ref, difficulty, submit_time)
+        Interfaces.share_limiter.submit(self.connection_ref, difficulty, submit_time, worker_name)
             
         # This checks if submitted share meet all requirements
         # and it is valid proof of work.
