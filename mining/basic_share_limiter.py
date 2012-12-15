@@ -54,7 +54,7 @@ class BasicShareLimiter(object):
 	self.buffersize = self.retarget / self.target *4
 	# TODO: trim the hash of inactive workers
 
-    def submit(self, connection_ref, current_difficulty, timestamp, worker_name):
+    def submit(self, connection_ref, job_id, current_difficulty, timestamp, worker_name):
 	ts = int(timestamp)
 
 	# Init the stats for this worker if it isn't set.	
@@ -94,6 +94,9 @@ class BasicShareLimiter(object):
 	log.info("Retarget for %s %i old: %i new: %i" % (worker_name,ddiff,current_difficulty,new_diff))
 
 	self.worker_stats[worker_name]['buffer'].clear()
-        connection_ref().get_session()['difficulty'] = new_diff
+        session = connection_ref().get_session()
+	session['prev_diff'] = session['difficulty']
+	session['prev_jobid'] = job_id
+	session['difficulty'] = new_diff
 	connection_ref().rpc('mining.set_difficulty', [new_diff,], is_notification=True)
 

@@ -27,7 +27,7 @@ class WorkerManagerInterface(object):
 class ShareLimiterInterface(object):
     '''Implement difficulty adjustments here'''
     
-    def submit(self, connection_ref, current_difficulty, timestamp, worker_name):
+    def submit(self, connection_ref, job_id, current_difficulty, timestamp, worker_name):
         '''connection - weak reference to Protocol instance
            current_difficulty - difficulty of the connection
            timestamp - submission time of current share

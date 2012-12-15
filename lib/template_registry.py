@@ -161,7 +161,7 @@ class TemplateRegistry(object):
         
         return j
         
-    def submit_share(self, job_id, worker_name, extranonce1_bin, extranonce2, ntime, nonce,
+    def submit_share(self, job_id, worker_name, session, extranonce1_bin, extranonce2, ntime, nonce,
                      difficulty):
         '''Check parameters and finalize block template. If it leads
            to valid block candidate, asynchronously submits the block
@@ -225,7 +225,9 @@ class TemplateRegistry(object):
         header_hex = binascii.hexlify(header_bin)
                  
         target_user = self.diff_to_target(difficulty)        
-        if hash_int > target_user:
+        if hash_int > target_user and \
+		( 'prev_jobid' not in session or session['prev_jobid'] < job_id \
+		or 'prev_diff' not in session or hash_int > self.diff_to_target(session['prev_diff']) ):
             raise SubmitException("Share is above target")
 
         # Mostly for debugging purposes

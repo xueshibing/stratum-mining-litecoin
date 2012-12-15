@@ -96,13 +96,13 @@ class MiningService(GenericService):
         submit_time = Interfaces.timestamper.time()
         ip = self.connection_ref()._get_ip()
     
-        Interfaces.share_limiter.submit(self.connection_ref, difficulty, submit_time, worker_name)
+        Interfaces.share_limiter.submit(self.connection_ref, job_id, difficulty, submit_time, worker_name)
             
         # This checks if submitted share meet all requirements
         # and it is valid proof of work.
         try:
             (block_header, block_hash, share_diff, on_submit) = Interfaces.template_registry.submit_share(job_id,
-                                                worker_name, extranonce1_bin, extranonce2, ntime, nonce, difficulty)
+                                                worker_name, session, extranonce1_bin, extranonce2, ntime, nonce, difficulty)
         except SubmitException as e:
             # block_header and block_hash are None when submitted data are corrupted
             Interfaces.share_manager.on_submit_share(worker_name, None, None, difficulty,
