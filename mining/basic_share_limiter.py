@@ -23,6 +23,8 @@ class SpeedBuffer:
 	def clear(self):
 		self.data=[]
 		self.cur=0
+	def size(self):
+		return self.cur
 
 class SpeedBufferFull:
 	def __init__(self,n):
@@ -38,6 +40,8 @@ class SpeedBufferFull:
 		self.data=[]
 		self.cur=0
 		self.__class__ = SpeedBuffer
+	def size(self):
+		return self.max
 
 class BasicShareLimiter(object):
     def __init__(self):
@@ -63,13 +67,16 @@ class BasicShareLimiter(object):
 	self.worker_stats[worker_name]['last_ts'] = ts
 
 	# Do We retarget? If not, we're done.
-	if ts - self.worker_stats[worker_name]['last_rtc'] < self.retarget:
+	if ts - self.worker_stats[worker_name]['last_rtc'] < self.retarget and self.worker_stats[worker_name]['buffer'].size() > 0:
 	    return
 
 	# Set up and log our check
 	self.worker_stats[worker_name]['last_rtc'] = ts
 	avg = self.worker_stats[worker_name]['buffer'].avg()
 	log.info("Checking Retarget for %s avg. %i target %i+-%i" % (worker_name,avg,self.target,self.variance) )
+	if avg < 1:
+	    log.info("Reseting avg = 1 since it's SOOO low")
+	    avg = 1
 
 	# Figure out our Delta-Diff
 	ddiff = current_difficulty * (self.target / avg)
