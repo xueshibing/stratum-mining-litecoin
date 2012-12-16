@@ -1,6 +1,8 @@
 import util
 from twisted.internet import defer
 
+from stratum import settings
+
 import stratum.logger
 log = stratum.logger.get_logger('coinbaser')
 
@@ -29,6 +31,13 @@ class SimpleCoinbaser(object):
         if result['isvalid'] and result['ismine']:
             self.is_valid = True
             log.info("Coinbase address '%s' is valid" % self.address)
+            
+            if not self.on_load.called:
+                self.on_load.callback(True)
+	
+	elif result['isvalid'] and settings.ALLOW_NONLOCAL_WALLET == True :
+            self.is_valid = True
+            log.warning("!!! Coinbase address '%s' is valid BUT it is not local" % self.address)
             
             if not self.on_load.called:
                 self.on_load.callback(True)

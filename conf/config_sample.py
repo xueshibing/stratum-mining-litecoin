@@ -98,6 +98,7 @@ USERS_CHECK_PASSWORD = False	# Check the workers password? (Many pools don't)
 # Transaction Settings
 CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local bitcoin address where money goes
 COINBASE_EXTRAS = '/stratumPool/'			# Extra Descriptive String to incorporate in solved blocks
+ALLOW_NONLOCAL_WALLET = False				# Allow valid, but NON-Local wallet's
 
 # Bitcoind communication polling settings (In Seconds)
 PREVHASH_REFRESH_INTERVAL = 5 	# How often to check for new Blocks
