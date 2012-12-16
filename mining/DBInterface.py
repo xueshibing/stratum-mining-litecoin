@@ -64,7 +64,7 @@ class DBInterface():
 	self.scheduleImport()
 
     def run_import(self):
-	self.do_import(self.dbi)
+	self.do_import(self.dbi,False)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
@@ -75,7 +75,7 @@ class DBInterface():
     def import_thread(self):
 	# Here we are in the thread.
 	dbi = self.connectDB()	
-	self.do_import(dbi)
+	self.do_import(dbi,False)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
@@ -86,9 +86,10 @@ class DBInterface():
 	self.dbi.update_pool_info({ 'blocks' : data['blocks'], 'balance' : data['balance'], 
 		'connections' : data['connections'], 'difficulty' : data['difficulty'] })
 
-    def do_import(self,dbi):
+    def do_import(self,dbi,force):
 	# Only run if we have data
-	while self.q.qsize() >= settings.DB_LOADER_REC_MIN:
+	while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN:
+	    force = False
 	    # Put together the data we want to import
 	    sqldata = []
 	    datacnt = 0
@@ -113,6 +114,7 @@ class DBInterface():
     def found_block(self,data):
 	try:
 	    log.info("Updating Found Block Share Record")
+	    self.do_import(self.dbi,True)	# We can't Update if the record is not there.
 	    self.dbi.found_block(data)
 	except Exception as e:
 	    log.error("Update Found Block Share Record Failed: %s", e.args[0])

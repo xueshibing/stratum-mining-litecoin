@@ -95,15 +95,15 @@ class DB_Sqlite():
 	# Note: difficulty = -1 here
 	self.dbc.execute("update shares set upstream_result = :usr, solution = :sol where time = :time and username = :user",
 		{'usr':data[5],'sol':data[2],'time':data[4],'user':data[0]})
-	if settings.DATABASE_EXTEND :
-	    if data[5] == True:
-	    	self.dbc.execute("update pool_worker set total_found = total_found + 1 where username = :user",{'user':data[0]})
+	if settings.DATABASE_EXTEND and data[5] == True :
+	    self.dbc.execute("update pool_worker set total_found = total_found + 1 where username = :user",{'user':data[0]})
 	    self.dbc.execute("select value from pool where parameter = 'pool_total_found'")
 	    total_found = int(self.dbc.fetchone()[0]) + 1
-	    self.dbc.execute("update pool set value = :val where paramter = :parm", [{'val':0,'parm':'round_shares'},
+	    self.dbc.executemany("update pool set value = :val where parameter = :parm", [{'val':0,'parm':'round_shares'},
 		{'val':0,'parm':'round_progress'},
+		{'val':0,'parm':'round_best_share'},
 		{'val':time.time(),'parm':'round_start'},
-		{'val':[total_found],'parm':'pool_total_found'}
+		{'val':total_found,'parm':'pool_total_found'}
 		])
 	self.dbh.commit()
 

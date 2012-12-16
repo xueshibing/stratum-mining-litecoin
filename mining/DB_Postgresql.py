@@ -87,17 +87,17 @@ class DB_Postgresql():
 
     def found_block(self,data):
 	# Note: difficulty = -1 here
-	self.dbc.execute("update shares set upstream_result = %s, solution = %s where time = %s and username = %s",
+	self.dbc.execute("update shares set upstream_result = %s, solution = %s where id in (select id from shares where time = to_timestamp(%s) and username = %s limit 1)",
 		(bool(data[5]),data[2],data[4],data[0]))
-	if settings.DATABASE_EXTEND :
-	    if data[5] == True:
-	    	self.dbc.execute("update pool_worker set total_found = total_found + 1 where username = %s",(data[0]))
+	if settings.DATABASE_EXTEND and data[5] == True :
+	    self.dbc.execute("update pool_worker set total_found = total_found + 1 where username = %s",(data[0],))
 	    self.dbc.execute("select value from pool where parameter = 'pool_total_found'")
 	    total_found = int(self.dbc.fetchone()[0]) + 1
-	    self.dbc.executemany("update pool set value = %s where paramter = %s",[(0,'round_shares'),
+	    self.dbc.executemany("update pool set value = %s where parameter = %s",[(0,'round_shares'),
 		(0,'round_progress'),
+		(0,'round_best_share'),
 		(time.time(),'round_start'),
-		([total_found],'pool_total_found')
+		(total_found,'pool_total_found')
 		])
 	self.dbh.commit()
 

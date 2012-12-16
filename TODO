@@ -6,8 +6,10 @@ Share Archiving in DB
 
 Add a "script" to add,list,disable users
 
-Implement a basic share limiter that increases difficulty until share time
-	is X seconds between shares
-
 Flush all Pending shares on shutdown (I really don't know how to do this.)
 
+create index if not exists shares_time_username ON shares(time,username)
+
+Variable difficulty should not be able to go higher than current difficulty
+
+Possibly allow non-local Coinbase (payaddress). (If we do, ensure we have to Disable checking in config)
