@@ -1,7 +1,6 @@
 from twisted.internet import reactor
-from twisted.web.server import Site
 from twisted.web.resource import Resource
-from twisted.web import static
+from twisted.web import static,server
 
 import time
 from datetime import timedelta
@@ -16,6 +15,10 @@ dbi = mining.DBInterface.DBInterface()
 
 import locale
 locale.setlocale(locale.LC_ALL, '')
+
+class Site(server.Site):
+    def log(self, request):
+	pass
 
 class StatsPage(Resource):
     isLeaf = False
