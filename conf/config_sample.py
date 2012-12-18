@@ -133,3 +133,13 @@ BASIC_STATS = True		# Enable basic stats page. This has stats for ALL users.
 				#   (Disable if you have your own frontend)
 
 BASIC_STATS_PORT = 8889		# Port to listen on
+
+# ******************** Getwork Proxy Settings *********************
+# This enables a copy of slush's getwork proxy for old clients
+# It will also auto-redirect new clients to the stratum interface
+# so you can point ALL clients to: http://<yourserver>:<GW_PORT>
+
+GW_ENABLE = False		# Enable the Proxy
+GW_PORT = 8331			# Getwork Proxy Port
+GW_DISABLE_MIDSTATE = False	# Disable midstate's (Faster but breaks some clients)
+GW_SEND_REAL_TARGET = False	# Propigate >1 difficulty to Clients (breaks some clients)
