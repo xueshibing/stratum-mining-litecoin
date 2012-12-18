@@ -139,7 +139,7 @@ BASIC_STATS_PORT = 8889		# Port to listen on
 # It will also auto-redirect new clients to the stratum interface
 # so you can point ALL clients to: http://<yourserver>:<GW_PORT>
 
-GW_ENABLE = False		# Enable the Proxy
+GW_ENABLE = False		# Enable the Proxy (If enabled you MUST run update_submodules)
 GW_PORT = 8331			# Getwork Proxy Port
 GW_DISABLE_MIDSTATE = False	# Disable midstate's (Faster but breaks some clients)
 GW_SEND_REAL_TARGET = False	# Propigate >1 difficulty to Clients (breaks some clients)
