@@ -79,7 +79,7 @@ class BasicShareLimiter(object):
 	    avg = 1
 
 	# Figure out our Delta-Diff
-	ddiff = current_difficulty * (self.target / avg)
+	ddiff = current_difficulty - (current_difficulty * (self.target / avg))
 	if (avg > self.tmax and current_difficulty > settings.POOL_TARGET):
 	    if ddiff > -1:
 	    	ddiff = -1
