@@ -79,13 +79,20 @@ class BasicShareLimiter(object):
 	    avg = 1
 
 	# Figure out our Delta-Diff
-	ddiff = current_difficulty - (current_difficulty * (self.target / avg))
+	ddiff = int( (float(current_difficulty) * (float(self.target) / float(avg))) - current_difficulty )
 	if (avg > self.tmax and current_difficulty > settings.POOL_TARGET):
+	    # For fractional -0.1 ddiff's just drop by 1
 	    if ddiff > -1:
 	    	ddiff = -1
+	    # Don't drop below POOL_TARGET
+	    if (ddiff + current_difficulty) < settings.POOL_TARGET:
+		ddiff = settings.POOL_TARGET - current_difficulty
 	elif avg < self.tmin:
+	    # For fractional 0.1 ddiff's just up by 1
 	    if ddiff < 1:
 		ddiff = 1
+	    # Don't go above BITCOIN_DIFF
+	    #TODO
 	else:			# If we are here, then we should not be retargeting.
 	    return
 
