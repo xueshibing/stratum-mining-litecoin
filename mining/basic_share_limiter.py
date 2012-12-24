@@ -73,7 +73,8 @@ class BasicShareLimiter(object):
 	# Set up and log our check
 	self.worker_stats[worker_name]['last_rtc'] = ts
 	avg = self.worker_stats[worker_name]['buffer'].avg()
-	log.info("Checking Retarget for %s avg. %i target %i+-%i" % (worker_name,avg,self.target,self.variance) )
+	log.info("Checking Retarget for %s (%i) avg. %i target %i+-%i" % (worker_name,current_difficulty,avg,
+		self.target,self.variance) )
 	if avg < 1:
 	    log.info("Reseting avg = 1 since it's SOOO low")
 	    avg = 1
