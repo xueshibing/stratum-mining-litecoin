@@ -1,5 +1,6 @@
 from twisted.internet import reactor, defer
 import time
+from datetime import datetime
 import Queue
 
 from stratum import settings
@@ -9,6 +10,11 @@ log = stratum.logger.get_logger('DBInterface')
 
 class DBInterface():
     def __init__(self):
+	self.dbi = self.connectDB()
+
+    def init_main(self):
+	self.dbi.check_tables()
+ 
 	self.q = Queue.Queue()
         self.queueclock = None
 
@@ -16,8 +22,6 @@ class DBInterface():
         self.clearusercache()
 
 	self.nextStatsUpdate = 0
-
-	self.dbi = self.connectDB()
 
         self.scheduleImport()
 
@@ -65,6 +69,8 @@ class DBInterface():
 
     def run_import(self):
 	self.do_import(self.dbi,False)
+	if settings.ARCHIVE_SHARES :
+	    self.archive_shares(dbi)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
@@ -76,6 +82,8 @@ class DBInterface():
 	# Here we are in the thread.
 	dbi = self.connectDB()	
 	self.do_import(dbi,False)
+	if settings.ARCHIVE_SHARES :
+	    self.archive_shares(dbi)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
@@ -108,6 +116,45 @@ class DBInterface():
 		    self.q.put(v)
 		break		# Allows us to sleep a little
 
+    def archive_shares(self,dbi):
+	found_time = dbi.archive_check()
+	if found_time == 0:
+	    return
+	log.info("Archiving shares newer than timestamp %f " % found_time)
+	dbi.archive_found(found_time)
+	if settings.ARCHIVE_MODE == 'db':
+	    dbi.archive_to_db(found_time)
+	    dbi.archive_cleanup(found_time)
+	elif settings.ARCHIVE_MODE == 'file':
+	    shares = dbi.archive_get_shares(found_time)
+
+	    filename = settings.ARCHIVE_FILE
+	    if settings.ARCHIVE_FILE_APPEND_TIME :
+		filename = filename + "-" + datetime.fromtimestamp(found_time).strftime("%Y-%m-%d-%H-%M-%S")
+	    filename = filename + ".csv"
+
+	    if settings.ARCHIVE_FILE_COMPRESS == 'gzip' :
+		import gzip
+		filename = filename + ".gz"
+		filehandle = gzip.open(filename, 'a')	
+	    elif settings.ARCHIVE_FILE_COMPRESS == 'bzip2' and settings.ARCHIVE_FILE_APPEND_TIME :
+		import bz2
+		filename = filename + ".bz2"
+		filehandle = bz2.BZFile(filename, mode='wb', buffering=4096 )
+	    else:
+		filehandle = open(filename, "a")
+
+	    while True:	
+		row = shares.fetchone()
+		if row == None:
+		    break
+		str1 = '","'.join([str(x) for x in row])
+		filehandle.write('"%s"\n' % str1)
+	    filehandle.close()
+	    
+
+	    dbi.archive_cleanup(found_time)
+
     def queue_share(self,data):
 	self.q.put( data )
 
@@ -120,6 +167,9 @@ class DBInterface():
 	    log.error("Update Found Block Share Record Failed: %s", e.args[0])
 
     def check_password(self,username,password):
+	if username == "":
+	    log.info("Rejected worker for blank username")
+	    return False
 	wid = username+":-:"+password
 	if wid in self.usercache :
 	    return True
@@ -143,8 +193,15 @@ class DBInterface():
 	self.usercache = {}
 	return self.dbi.update_user(username,password)
 
+    def update_worker_diff(self,username,diff):
+	return self.dbi.update_worker_diff(username,diff)
+
     def get_pool_stats(self):
 	return self.dbi.get_pool_stats()
     
     def get_workers_stats(self):
 	return self.dbi.get_workers_stats()
+
+    def clear_worker_diff(self):
+	return self.dbi.clear_worker_diff()
+

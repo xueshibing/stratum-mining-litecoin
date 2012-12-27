@@ -143,3 +143,14 @@ GW_ENABLE = False		# Enable the Proxy (If enabled you MUST run update_submodules
 GW_PORT = 8331			# Getwork Proxy Port
 GW_DISABLE_MIDSTATE = False	# Disable midstate's (Faster but breaks some clients)
 GW_SEND_REAL_TARGET = False	# Propigate >1 difficulty to Clients (breaks some clients)
+
+# ******************** Archival Settings *********************
+
+ARCHIVE_SHARES = False		# Use share archiving?
+ARCHIVE_DELAY = 86400		# Seconds after finding a share to archive all previous shares
+ARCHIVE_MODE = 'file'		# Do we archive to a file (file) , or to a database table (db)
+
+# Archive file options
+ARCHIVE_FILE = 'archives/share_archive'	# Name of the archive file ( .csv extension will be appended)
+ARCHIVE_FILE_APPEND_TIME = True		# Append the Date/Time to the end of the filename (must be true for bzip2 compress)
+ARCHIVE_FILE_COMPRESS = 'none'		# Method to compress file (none,gzip,bzip2)

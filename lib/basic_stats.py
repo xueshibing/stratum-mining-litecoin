@@ -87,7 +87,7 @@ class StatsPage(Resource):
 	if size <= 10:
 	    r+="<tr><td width=33%>"
 	    r+="<table width=100% vspace=0 hspace=0 cellpadding=1 cellspacing=0>"
-	    r+="<tr><td>Worker</td><td>Speed</td><td>Shares/Rej</td><td>Found</td></tr>"
+	    r+="<tr><td>Worker</td><td>Speed/Diff</td><td>Shares/Rej</td><td>Found</td></tr>"
 	    for (w, wi) in enumerate(workers_stats):
 		wd = workers_stats[wi]
 		wc = "#A00"
@@ -95,8 +95,9 @@ class StatsPage(Resource):
 		    wc = "yellow"
 		if wd["speed"] > 100:
 		    wc = "#0A0"
-		r+="<tr bgcolor=\"%s\"><td>%s</td><td>%s</td><td>%s/%s</td><td>%s</td><tr>"%(
-			wc,wi,format(int(wd["speed"]),"n"),format(int(wd["total_shares"]),"n"),format(int(wd["total_rejects"]),"n"),format(int(wd["total_found"]),"n"))
+		r+="<tr bgcolor=\"%s\"><td>%s</td><td>%s/%s</td><td>%s/%s</td><td>%s</td><tr>"%(
+			wc,wi,format(int(wd["speed"]),"n"),wd["difficulty"],format(int(wd["total_shares"]),"n"),
+			format(int(wd["total_rejects"]),"n"),format(int(wd["total_found"]),"n"))
 	    r+="</table></td><td></td></tr>"
 	else :
 	    colcnt = int(size/3) + 1
@@ -111,8 +112,9 @@ class StatsPage(Resource):
 		    wc = "yellow"
 		if wd["speed"] > 100:
 		    wc = "#0A0"
-		r+="<tr bgcolor=\"%s\"><td>%s</td><td>%s</td><td>%s/%s</td><td>%s</td><tr>"%(
-			wc,wi,format(int(wd["speed"]),"n"),format(int(wd["total_shares"]),"n"),format(int(wd["total_rejects"]),"n"),format(int(wd["total_found"]),"n"))
+		r+="<tr bgcolor=\"%s\"><td>%s</td><td>%s/%s</td><td>%s/%s</td><td>%s</td><tr>"%(
+			wc,wi,format(int(wd["speed"]),"n"),wd["difficulty"],format(int(wd["total_shares"]),"n"),
+			format(int(wd["total_rejects"]),"n"),format(int(wd["total_found"]),"n"))
 		colt = colt - 1
 		if colt <= 0:
 	    	    r+="</table></td><td width=33% valign=top>"

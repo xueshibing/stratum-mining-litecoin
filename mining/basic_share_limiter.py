@@ -3,6 +3,9 @@ from stratum import settings
 import stratum.logger
 log = stratum.logger.get_logger('BasicShareLimiter')
 
+import DBInterface
+dbi = DBInterface.DBInterface()
+dbi.clear_worker_diff()
 
 ''' This is just a cusomized ring buffer '''
 class SpeedBuffer:
@@ -60,6 +63,7 @@ class BasicShareLimiter(object):
 	# Init the stats for this worker if it isn't set.	
 	if worker_name not in self.worker_stats :
 	    self.worker_stats[worker_name] = {'last_rtc': (ts - self.retarget/2), 'last_ts': ts, 'buffer': SpeedBuffer(self.buffersize) }
+	    dbi.update_worker_diff(worker_name,settings.POOL_TARGET)
 	    return
 	
 	# Standard share update of data
@@ -106,5 +110,6 @@ class BasicShareLimiter(object):
 	session['prev_diff'] = session['difficulty']
 	session['prev_jobid'] = job_id
 	session['difficulty'] = new_diff
+	dbi.update_worker_diff(worker_name,new_diff)
 	connection_ref().rpc('mining.set_difficulty', [new_diff,], is_notification=True)
 

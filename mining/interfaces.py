@@ -12,6 +12,7 @@ log = stratum.logger.get_logger('interfaces')
 
 import DBInterface
 dbi = DBInterface.DBInterface()
+dbi.init_main()
 
 class WorkerManagerInterface(object):
     def __init__(self):
@@ -34,9 +35,8 @@ class ShareLimiterInterface(object):
            
            - raise SubmitException for stop processing this request
            - call mining.set_difficulty on connection to adjust the difficulty'''
-	
-        pass
-    
+	return dbi.update_worker_diff(worker_name,settings.POOL_TARGET)
+ 
 class ShareManagerInterface(object):
     def __init__(self):
         # Fire deferred when manager is ready

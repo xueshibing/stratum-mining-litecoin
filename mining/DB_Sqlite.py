@@ -11,8 +11,6 @@ class DB_Sqlite():
 	self.dbh = sqlite3.connect(settings.DB_SQLITE_FILE)
 	self.dbc = self.dbh.cursor()
 
-	self.check_tables()
-
     def updateStats(self,averageOverTime):
 	log.debug("Updating Stats")
 	# Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
@@ -29,6 +27,30 @@ class DB_Sqlite():
 	self.dbc.execute("update pool set value = :val where parameter = 'pool_speed'",{'val':total_speed})
 	self.dbh.commit()
 
+    def archive_check(self):
+	# Check for found shares to archive
+	self.dbc.execute("select time from shares where upstream_result = 1 order by time limit 1")
+	data = self.dbc.fetchone()
+	if data is None or (data[0] + settings.ARCHIVE_DELAY) > time.time() :
+	    return False
+	return data[0]
+
+    def archive_found(self,found_time):
+	self.dbc.execute("insert into shares_archive_found select * from shares where upstream_result = 1 and time <= :time",{'time':found_time})
+	self.dbh.commit()
+
+    def archive_to_db(self,found_time):
+	self.dbc.execute("insert into shares_archive select * from shares where time <= :time",{'time':found_time})	
+	self.dbh.commit()
+
+    def archive_cleanup(self,found_time):
+	self.dbc.execute("delete from shares where time <= :time",{'time':found_time})
+	self.dbh.commit()
+
+    def archive_get_shares(self,found_time):
+	self.dbc.execute("select * from shares where time <= :time",{'time':found_time})
+	return self.dbc
+		
     def import_shares(self,data):
 	log.debug("Importing Shares")
 #	       0           1            2          3          4         5        6  7            8         9              10
@@ -130,6 +152,15 @@ class DB_Sqlite():
 	    return True
 	return False
 
+    def update_worker_diff(self,username,diff):
+	self.dbc.execute("update pool_worker set difficulty = :diff where username = :user",{'diff':diff,'user':username})
+	self.dbh.commit()
+    
+    def clear_worker_diff(self):
+	if settings.DATABASE_EXTEND == True :
+	    self.dbc.execute("update pool_worker set difficulty = 0")
+	    self.dbh.commit()
+
     def update_pool_info(self,pi):
 	self.dbc.executemany("update pool set value = :val where parameter = :parm",[{'val':pi['blocks'],'parm':"bitcoin_blocks"},
 		{'val':pi['balance'],'parm':"bitcoin_balance"},
@@ -147,7 +178,7 @@ class DB_Sqlite():
 	return ret
 
     def get_workers_stats(self):
-	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found,alive from pool_worker")
+	self.dbc.execute("select username,speed,last_checkin,total_shares,total_rejects,total_found,alive,difficulty from pool_worker")
 	ret = {}
 	for data in self.dbc.fetchall():
 	    ret[data[0]] = { "username" : data[0],
@@ -156,7 +187,8 @@ class DB_Sqlite():
 		"total_shares" : data[3],
 		"total_rejects" : data[4],
 		"total_found" : data[5],
-		"alive" : data[6] }
+		"alive" : data[6],
+		"difficulty" : data[7] }
 	return ret
 
     def check_tables(self):
@@ -186,7 +218,7 @@ class DB_Sqlite():
 
     def update_tables(self):
 	version = 0
-	current_version = 4
+	current_version = 5
 	while version < current_version :
 	    self.dbc.execute("select value from pool where parameter = 'DB Version'")
 	    data = self.dbc.fetchone()
@@ -219,5 +251,17 @@ class DB_Sqlite():
 		])
 	self.dbc.execute("alter table pool_worker add alive INTEGER default 0")
 	self.dbc.execute("update pool set value = 4 where parameter = 'DB Version'")
+	self.dbh.commit()
+	
+    def update_version_4(self):
+	log.info("running update 4")
+	self.dbc.execute("alter table pool_worker add difficulty INTEGER default 0")
+	self.dbc.execute("create table if not exists shares_archive" +\
+		"(time DATETIME,rem_host TEXT, username TEXT, our_result INTEGER, upstream_result INTEGER, reason TEXT, solution TEXT, " +\
+		"block_num INTEGER, prev_block_hash TEXT, useragent TEXT, difficulty INTEGER)")
+	self.dbc.execute("create table if not exists shares_archive_found" +\
+		"(time DATETIME,rem_host TEXT, username TEXT, our_result INTEGER, upstream_result INTEGER, reason TEXT, solution TEXT, " +\
+		"block_num INTEGER, prev_block_hash TEXT, useragent TEXT, difficulty INTEGER)")
+	self.dbc.execute("update pool set value = 5 where parameter = 'DB Version'")
 	self.dbh.commit()
 	
