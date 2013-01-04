@@ -99,7 +99,10 @@ class DB_Sqlite():
 	    self.dbc.execute("select value from pool where parameter = 'bitcoin_difficulty'")
 	    difficulty = float(self.dbc.fetchone()[0])
 
-	    progress = (round_shares/difficulty)*100
+	    if difficulty == 0:
+		progress = 0
+	    else:
+	    	progress = (round_shares/difficulty)*100
 	    self.dbc.execute("update pool set value = :val where parameter = 'round_progress'",{'val':progress})
 
 	    sqldata = []
@@ -191,6 +194,9 @@ class DB_Sqlite():
 		"difficulty" : data[7] }
 	return ret
 
+    def close(self):
+	self.dbh.close()
+
     def check_tables(self):
 	log.debug("Checking Tables")
 	if settings.DATABASE_EXTEND == True :
@@ -213,12 +219,11 @@ class DB_Sqlite():
 		self.dbc.execute("create table if not exists shares" + \
 			"(time DATETIME,rem_host TEXT, username TEXT, our_result INTEGER, upstream_result INTEGER, reason TEXT, solution TEXT)")
 		self.dbc.execute("create table if not exists pool_worker(username TEXT, password TEXT)")
-	self.dbc.execute("create index if not exists shares_username ON shares(username)")
-	self.dbc.execute("create index if not exists pool_worker_username ON pool_worker(username)")
+		self.dbc.execute("create index if not exists pool_worker_username ON pool_worker(username)")
 
     def update_tables(self):
 	version = 0
-	current_version = 5
+	current_version = 6
 	while version < current_version :
 	    self.dbc.execute("select value from pool where parameter = 'DB Version'")
 	    data = self.dbc.fetchone()
@@ -240,6 +245,8 @@ class DB_Sqlite():
 		('round_progress',0),
 		('round_start',time.time())
 		])
+	self.dbc.execute("create index if not exists shares_username ON shares(username)")
+	self.dbc.execute("create index if not exists pool_worker_username ON pool_worker(username)")
 	self.dbc.execute("update pool set value = 3 where parameter = 'DB Version'")
 	self.dbh.commit()
     
@@ -265,3 +272,25 @@ class DB_Sqlite():
 	self.dbc.execute("update pool set value = 5 where parameter = 'DB Version'")
 	self.dbh.commit()
 	
+    def update_version_5(self):
+	log.info("running update 5")
+	# Adding Primary key to table: pool
+	self.dbc.execute("alter table pool rename to pool_old")
+	self.dbc.execute("create table if not exists pool(parameter TEXT, value TEXT, primary key(parameter))")
+	self.dbc.execute("insert into pool select * from pool_old")
+	self.dbc.execute("drop table pool_old")
+	self.dbh.commit()
+	# Adding Primary key to table: pool_worker
+	self.dbc.execute("alter table pool_worker rename to pool_worker_old")
+	self.dbc.execute("CREATE TABLE pool_worker(username TEXT, password TEXT, speed INTEGER, last_checkin DATETIME, total_shares INTEGER default 0, total_rejects INTEGER default 0, total_found INTEGER default 0, alive INTEGER default 0, difficulty INTEGER default 0, primary key(username))")
+	self.dbc.execute("insert into pool_worker select * from pool_worker_old")
+	self.dbc.execute("drop table pool_worker_old")
+	self.dbh.commit()
+	# Adjusting indicies on table: shares
+	self.dbc.execute("DROP INDEX shares_username")
+	self.dbc.execute("CREATE INDEX shares_time_username ON shares(time,username)")
+	self.dbc.execute("CREATE INDEX shares_upstreamresult ON shares(upstream_result)")
+	self.dbh.commit()
+	
+	self.dbc.execute("update pool set value = 6 where parameter = 'DB Version'")
+	self.dbh.commit()

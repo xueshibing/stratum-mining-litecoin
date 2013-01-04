@@ -69,26 +69,27 @@ class DBInterface():
 
     def run_import(self):
 	self.do_import(self.dbi,False)
-	if settings.ARCHIVE_SHARES :
-	    self.archive_shares(dbi)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
+	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
             d.addCallback(self._update_pool_info)
-	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
+	    if settings.ARCHIVE_SHARES :
+		self.archive_shares(dbi)
 	self.scheduleImport()
 
     def import_thread(self):
 	# Here we are in the thread.
 	dbi = self.connectDB()	
 	self.do_import(dbi,False)
-	if settings.ARCHIVE_SHARES :
-	    self.archive_shares(dbi)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
+	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
 	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
             d.addCallback(self._update_pool_info)
-	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
+	    if settings.ARCHIVE_SHARES :
+	    	self.archive_shares(dbi)
+	dbi.close()
 
     def _update_pool_info(self,data):
 	self.dbi.update_pool_info({ 'blocks' : data['blocks'], 'balance' : data['balance'], 

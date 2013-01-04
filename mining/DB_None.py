@@ -42,4 +42,7 @@ class DB_None():
 
     def check_tables(self):
 	log.debug("Checking Tables")
+
+    def close(self):
+	log.debug("Close Connection")
 	

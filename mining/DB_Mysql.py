@@ -95,7 +95,10 @@ class DB_Mysql():
 	    self.dbc.execute("select value from pool where parameter = 'bitcoin_difficulty'")
 	    difficulty = float(self.dbc.fetchone()[0])
 
-	    progress = (round_shares/difficulty)*100
+	    if difficulty == 0:
+		progress = 0
+	    else:
+	    	progress = (round_shares/difficulty)*100
 	    self.dbc.execute("update pool set value = %s where parameter = 'round_progress'",[progress])
 	
 	    for k,v in checkin_times.items():
@@ -187,59 +190,27 @@ class DB_Mysql():
 		"difficulty" : data[7] }
 	return ret
 
+    def close(self):
+	self.dbh.close()
+
     def check_tables(self):
 	log.debug("Checking Tables")
 
+	# Do we have our tables?
 	shares_exist = False
-	self.dbc.execute("select COUNT(*) from INFORMATION_SCHEMA.STATISTICS where table_schema = %(schema)s and table_name = 'shares' and index_name = 'shares_username'",
+	self.dbc.execute("select COUNT(*) from INFORMATION_SCHEMA.STATISTICS " +\
+		"where table_schema = %(schema)s and table_name = 'shares' and index_name = 'shares_username'",
 		{"schema": settings.DB_MYSQL_DBNAME })
 	data = self.dbc.fetchone()
-	if data[0] > 0 :
-	    shares_exist = True
-
-	pool_worker_exist = False
-	self.dbc.execute("select COUNT(*) from INFORMATION_SCHEMA.STATISTICS where table_schema = %(schema)s and table_name = 'pool_worker' and index_name = 'pool_worker_username'", 
-		{"schema": settings.DB_MYSQL_DBNAME })
-	data = self.dbc.fetchone()
-	if data[0] > 0 :
-	    pool_worker_exist = True
-
+	if data[0] <= 0 :
+	    self.update_version_1()	# no, we don't, so create them
+	    
 	if settings.DATABASE_EXTEND == True :
-	    self.dbc.execute("create table if not exists shares " +\
-		"(id serial primary key,time timestamp,rem_host TEXT, username TEXT, our_result BOOLEAN, upstream_result BOOLEAN, reason TEXT, solution TEXT, " +\
-		"block_num INTEGER, prev_block_hash TEXT, useragent TEXT, difficulty INTEGER) ENGINE = MYISAM;")
-	    if shares_exist == False:
-	    	self.dbc.execute("create index shares_username ON shares(username(10))")
-
-	    self.dbc.execute("create table if not exists pool_worker" +\
-		"(id serial primary key,username TEXT, password TEXT, speed INTEGER, last_checkin timestamp" +\
-		") ENGINE = MYISAM")
-	    if pool_worker_exist == False:
-	    	self.dbc.execute("create index pool_worker_username ON pool_worker(username(10))")
-	
-	    self.dbc.execute("create table if not exists pool(parameter TEXT, value TEXT)")
-	    self.dbc.execute("select COUNT(*) from pool where parameter = 'DB Version'")
-	    data = self.dbc.fetchone()
-	    if data[0] <= 0:
-		self.dbc.execute("alter table pool_worker add total_shares INTEGER default 0")
-		self.dbc.execute("alter table pool_worker add total_rejects INTEGER default 0")
-		self.dbc.execute("alter table pool_worker add total_found INTEGER default 0")
-		self.dbc.execute("insert into pool (parameter,value) VALUES ('DB Version',2)")
-
 	    self.update_tables()
-	else :
-	    self.dbc.execute("create table if not exists shares" + \
-		"(id serial,time timestamp,rem_host TEXT, username TEXT, our_result INTEGER, upstream_result INTEGER, reason TEXT, solution TEXT) ENGINE = MYISAM")
-	    if shares_exist == False:
-	    	self.dbc.execute("create index shares_username ON shares(username(10))")
-	    self.dbc.execute("create table if not exists pool_worker(id serial,username TEXT, password TEXT) ENGINE = MYISAM")
-	    if pool_worker_exist == False:
-	    	self.dbc.execute("create index pool_worker_username ON pool_worker(username(10))")
-	self.dbh.commit()
 	
     def update_tables(self):
 	version = 0
-	current_version = 5
+	current_version = 6
 	while version < current_version :
 	    self.dbc.execute("select value from pool where parameter = 'DB Version'")
 	    data = self.dbc.fetchone()
@@ -247,6 +218,32 @@ class DB_Mysql():
 	    if version < current_version :
 		log.info("Updating Database from %i to %i" % (version, version +1))
 		getattr(self, 'update_version_' + str(version) )()
+
+    def update_version_1(self):
+	if settings.DATABASE_EXTEND == True :
+	    self.dbc.execute("create table if not exists shares " +\
+		"(id serial primary key,time timestamp,rem_host TEXT, username TEXT, our_result BOOLEAN, upstream_result BOOLEAN, reason TEXT, solution TEXT, " +\
+		"block_num INTEGER, prev_block_hash TEXT, useragent TEXT, difficulty INTEGER) ENGINE = MYISAM;")
+	    self.dbc.execute("create index shares_username ON shares(username(10))")
+
+	    self.dbc.execute("create table if not exists pool_worker" +\
+		"(id serial primary key,username TEXT, password TEXT, speed INTEGER, last_checkin timestamp" +\
+		") ENGINE = MYISAM")
+	    self.dbc.execute("create index pool_worker_username ON pool_worker(username(10))")
+	
+	    self.dbc.execute("create table if not exists pool(parameter TEXT, value TEXT)")
+	    self.dbc.execute("alter table pool_worker add total_shares INTEGER default 0")
+	    self.dbc.execute("alter table pool_worker add total_rejects INTEGER default 0")
+	    self.dbc.execute("alter table pool_worker add total_found INTEGER default 0")
+	    self.dbc.execute("insert into pool (parameter,value) VALUES ('DB Version',2)")
+
+	else :
+	    self.dbc.execute("create table if not exists shares" + \
+		"(id serial,time timestamp,rem_host TEXT, username TEXT, our_result INTEGER, upstream_result INTEGER, reason TEXT, solution TEXT) ENGINE = MYISAM")
+	    self.dbc.execute("create index shares_username ON shares(username(10))")
+	    self.dbc.execute("create table if not exists pool_worker(id serial,username TEXT, password TEXT) ENGINE = MYISAM")
+	    self.dbc.execute("create index pool_worker_username ON pool_worker(username(10))")
+	self.dbh.commit()
 		    
 
     def update_version_2(self):
@@ -285,4 +282,18 @@ class DB_Mysql():
 		"block_num INTEGER, prev_block_hash TEXT, useragent TEXT, difficulty INTEGER) ENGINE = MYISAM;")
 	self.dbc.execute("update pool set value = 5 where parameter = 'DB Version'")
 	self.dbh.commit()
+
+    def update_version_5(self):
+	log.info("running update 5")
+	# Adding Primary key to table: pool
+	self.dbc.execute("alter table pool add primary key (parameter(100))")
+	self.dbh.commit()
+	# Adjusting indicies on table: shares
+	self.dbc.execute("DROP INDEX shares_username ON shares")
+	self.dbc.execute("CREATE INDEX shares_time_username ON shares(time,username(10))")
+	self.dbc.execute("CREATE INDEX shares_upstreamresult ON shares(upstream_result)")
+	self.dbh.commit()
 	
+	self.dbc.execute("update pool set value = 6 where parameter = 'DB Version'")
+	self.dbh.commit()
+
