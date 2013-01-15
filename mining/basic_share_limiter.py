@@ -110,6 +110,6 @@ class BasicShareLimiter(object):
 	session['prev_diff'] = session['difficulty']
 	session['prev_jobid'] = job_id
 	session['difficulty'] = new_diff
-	dbi.update_worker_diff(worker_name,new_diff)
 	connection_ref().rpc('mining.set_difficulty', [new_diff,], is_notification=True)
+	dbi.update_worker_diff(worker_name,new_diff)
 
