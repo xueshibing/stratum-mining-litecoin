@@ -13,3 +13,5 @@ Variable difficulty should not be able to go higher than current difficulty
 Test NON-Local Coinbase with testnet in a box
 
 verify settings
+
+send e-mail on dead miner

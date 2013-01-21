@@ -10,6 +10,8 @@ from lib.util import b58encode
 import stratum.logger
 log = stratum.logger.get_logger('interfaces')
 
+import lib.notify_email
+
 import DBInterface
 dbi = DBInterface.DBInterface()
 dbi.init_main()
@@ -44,6 +46,10 @@ class ShareManagerInterface(object):
         self.on_load.callback(True)
 	self.block_height = 0
 	self.prev_hash = 0
+    
+	# Send out the e-mail saying we are starting.
+    	notify_email = lib.notify_email.NOTIFY_EMAIL()
+   	notify_email.notify_start()
 
     def on_network_block(self, prevhash, block_height):
         '''Prints when there's new block coming from the network (possibly new round)'''
@@ -59,6 +65,11 @@ class ShareManagerInterface(object):
     def on_submit_block(self, is_accepted, worker_name, block_header, block_hash, timestamp, ip, share_diff ):
         log.info("Block %s %s" % (block_hash, 'ACCEPTED' if is_accepted else 'REJECTED'))
 	dbi.found_block([worker_name,block_header,block_hash,-1,timestamp,is_accepted,ip,self.block_height, self.prev_hash, share_diff ])
+	
+	# Send out the e-mail saying we found a block.
+	if is_accepted:
+	    notify_email = lib.notify_email.NOTIFY_EMAIL()
+	    notify_email.notify_found_block(worker_name)
     
 class TimestamperInterface(object):
     '''This is the only source for current time in the application.

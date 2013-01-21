@@ -154,3 +154,14 @@ ARCHIVE_MODE = 'file'		# Do we archive to a file (file) , or to a database table
 ARCHIVE_FILE = 'archives/share_archive'	# Name of the archive file ( .csv extension will be appended)
 ARCHIVE_FILE_APPEND_TIME = True		# Append the Date/Time to the end of the filename (must be true for bzip2 compress)
 ARCHIVE_FILE_COMPRESS = 'none'		# Method to compress file (none,gzip,bzip2)
+
+# ******************** E-Mail Notification Settings *********************
+
+NOTIFY_EMAIL_TO = ''		# Where to send Start/Found block notifications
+NOTIFY_EMAIL_TO_DEADMINER = ''	# Where to send dead miner notifications
+NOTIFY_EMAIL_FROM = 'root@localhost'	# Sender address
+NOTIFY_EMAIL_SERVER = 'localhost'	# E-Mail Sender
+NOTIFY_EMAIL_USERNAME = ''		# E-Mail server SMTP Logon
+NOTIFY_EMAIL_PASSWORD = ''
+NOTIFY_EMAIL_USETLS = True
+
