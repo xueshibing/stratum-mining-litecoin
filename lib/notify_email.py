@@ -10,12 +10,17 @@ class NOTIFY_EMAIL():
 
     def notify_start(self):
 	if settings.NOTIFY_EMAIL_TO != '':
-	    self.send_email(settings.NOTIFY_EMAIL_TO,'Stratum Server Started','Stratum server has started!')
+	    self.send_emails(settings.NOTIFY_EMAIL_TO,'Stratum Server Started','Stratum server has started!')
     
     def notify_found_block(self,worker_name):
 	if settings.NOTIFY_EMAIL_TO != '':
 	    text = '%s on Stratum server found a block!' % worker_name
-	    self.send_email(settings.NOTIFY_EMAIL_TO,'Stratum Server Found Block',text)
+	    self.send_emails(settings.NOTIFY_EMAIL_TO,'Stratum Server Found Block',text)
+
+    def send_emails(self,to,subject,message):
+	tos = to.split(";")
+	for tov in tos:
+	    self.send_email(tov,subject,message)
 
     def send_email(self,to,subject,message):
 	msg = MIMEText(message)
