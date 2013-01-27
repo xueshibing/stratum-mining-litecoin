@@ -6,8 +6,6 @@ Add a "script" to add,list,disable users
 
 Flush all Pending shares on shutdown (I really don't know how to do this.)
 
-Verify and create indicies on the shares, pool, and pool_worker tables
-
 Variable difficulty should not be able to go higher than current difficulty
 
 Test NON-Local Coinbase with testnet in a box
@@ -15,3 +13,9 @@ Test NON-Local Coinbase with testnet in a box
 verify settings
 
 send e-mail on dead miner
+
+multiple bitcoind
+
+send e-mail on dead bitcoind
+
+

@@ -1,7 +1,20 @@
 '''
 This is example configuration for Stratum server.
 Please rename it to config.py and fill correct values.
+
+This is already setup with sane values for solomining.
+You NEED to set the parameters in BASIC SETTINGS
 '''
+
+# ******************** BASIC SETTINGS ***************
+# These are the MUST BE SET parameters!
+
+CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local bitcoin address where money goes
+
+BITCOIN_TRUSTED_HOST = 'localhost'
+BITCOIN_TRUSTED_PORT = 8332
+BITCOIN_TRUSTED_USER = 'user'
+BITCOIN_TRUSTED_PASSWORD = 'somepassword'
 
 # ******************** GENERAL SETTINGS ***************
 
@@ -46,10 +59,7 @@ LISTEN_WSS_TRANSPORT = None
 
 # Hostname and credentials for one trusted Bitcoin node ("Satoshi's client").
 # Stratum uses both P2P port (which is 8333 already) and RPC port
-BITCOIN_TRUSTED_HOST = 'localhost'
-BITCOIN_TRUSTED_PORT = 8332
-BITCOIN_TRUSTED_USER = 'user'
-BITCOIN_TRUSTED_PASSWORD = 'somepassword'
+# BITCOIN_TRUSTED_* 	-- in basic settings above
 
 # Use scripts/generateAdminHash.sh <password> to generate the hash
 # for calculating SHA256 of your preferred password
@@ -96,7 +106,7 @@ USERS_AUTOADD = True		# Automatically add users to db when they connect.
 USERS_CHECK_PASSWORD = False	# Check the workers password? (Many pools don't)
 
 # Transaction Settings
-CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local bitcoin address where money goes
+# CENTRAL_WALLET	---- In basic settings at top
 COINBASE_EXTRAS = '/stratumPool/'			# Extra Descriptive String to incorporate in solved blocks
 ALLOW_NONLOCAL_WALLET = False				# Allow valid, but NON-Local wallet's
 
@@ -117,7 +127,7 @@ INSTANCE_ID = 31		# Not a clue what this is for... :P
 POOL_TARGET = 1			# Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
-VARIABLE_DIFF = False		# Master variable difficulty enable
+VARIABLE_DIFF = True		# Master variable difficulty enable
 
 # Variable diff tuning variables
 VDIFF_TARGET = 30		# Target time per share (i.e. try to get 1 share per this many seconds)

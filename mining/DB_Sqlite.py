@@ -45,6 +45,7 @@ class DB_Sqlite():
 
     def archive_cleanup(self,found_time):
 	self.dbc.execute("delete from shares where time <= :time",{'time':found_time})
+	self.dbc.execute("vacuum")
 	self.dbh.commit()
 
     def archive_get_shares(self,found_time):

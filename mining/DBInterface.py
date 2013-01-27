@@ -58,9 +58,14 @@ class DBInterface():
 
     def scheduleImport(self):
 	# This schedule's the Import
-	# If you don't want to use threads change 
-	#	self.run_import_thread to self.run_import
-        self.queueclock = reactor.callLater( settings.DB_LOADER_CHECKTIME , self.run_import_thread)
+	use_thread = True
+	if settings.DATABASE_DRIVER == "sqlite":
+	    use_thread = False
+	
+	if use_thread:
+            self.queueclock = reactor.callLater( settings.DB_LOADER_CHECKTIME , self.run_import_thread)
+	else:
+            self.queueclock = reactor.callLater( settings.DB_LOADER_CHECKTIME , self.run_import)
     
     def run_import_thread(self):
 	if self.q.qsize() >= settings.DB_LOADER_REC_MIN:	# Don't incur thread overhead if we're not going to run
@@ -71,11 +76,11 @@ class DBInterface():
 	self.do_import(self.dbi,False)
 	if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
 	    self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
-	    dbi.updateStats(settings.DB_STATS_AVG_TIME)
+	    self.dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
             d.addCallback(self._update_pool_info)
 	    if settings.ARCHIVE_SHARES :
-		self.archive_shares(dbi)
+		self.archive_shares(self.dbi)
 	self.scheduleImport()
 
     def import_thread(self):
@@ -120,7 +125,7 @@ class DBInterface():
     def archive_shares(self,dbi):
 	found_time = dbi.archive_check()
 	if found_time == 0:
-	    return
+	    return False
 	log.info("Archiving shares newer than timestamp %f " % found_time)
 	dbi.archive_found(found_time)
 	if settings.ARCHIVE_MODE == 'db':
@@ -152,9 +157,18 @@ class DBInterface():
 		str1 = '","'.join([str(x) for x in row])
 		filehandle.write('"%s"\n' % str1)
 	    filehandle.close()
-	    
 
-	    dbi.archive_cleanup(found_time)
+	    clean = False
+	    while not clean:
+		try:
+		    dbi.archive_cleanup(found_time)
+		    clean = True
+		except Exception as e:
+		    clean = False
+		    log.error("Archive Cleanup Failed... will retry to cleanup in 30 seconds")
+		    sleep(30)
+		
+	return True
 
     def queue_share(self,data):
 	self.q.put( data )

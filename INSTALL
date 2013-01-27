@@ -17,10 +17,8 @@ Step 2: Pull a copy of the miner
 Step 3: Configure the Miner
 	cp conf/config_sample.py conf/config.py
 	make your changes to conf/config.py 
-	Make sure you set:
-		CENTRAL_WALLET
-		BITCOIN_TRUSTED_USER
-		BITCOIN_TRUSTED_PASSWORD
+	Make sure you set the values in BASIC SETTINGS! These are how to connect to bitcoind
+	  and where your money goes!
 
 Step 4: Run the pool
 	twistd -ny launcher.tac -l -
@@ -64,8 +62,13 @@ None:
 Well, this doesn't do anything, so there is nothing to set up
 
 Sqlite:
-Just set the file path in the config file.
-Support for sqlite3 is built into recent python versions
+THIS IS THE DEFAULT!
+Just set the file path in the config file (or keep the default.)
+Support for sqlite3 is built into recent python versions.
+A couple notes for Sqlite:
+	- Sqlite and threading/concurancy just doesn't work right for that reason it is disabled.
+	- Since threading is disabled, The server will "pause" when archiving happens, this will affect
+		your miners. However this will not happen often (24 hours after finding a share)
 
 Postgresql:
 1: Set up your parameters in the config file.
