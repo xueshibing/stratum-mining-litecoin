@@ -16,6 +16,20 @@ BITCOIN_TRUSTED_PORT = 8332
 BITCOIN_TRUSTED_USER = 'user'
 BITCOIN_TRUSTED_PASSWORD = 'somepassword'
 
+# ******************** BASIC SETTINGS ***************
+# Backup Bitcoind connections (consider having at least 1 backup)
+# You can have up to 99
+
+#BITCOIN_TRUSTED_HOST_1 = 'localhost'
+#BITCOIN_TRUSTED_PORT_1 = 8332
+#BITCOIN_TRUSTED_USER_1 = 'user'
+#BITCOIN_TRUSTED_PASSWORD_1 = 'somepassword'
+
+#BITCOIN_TRUSTED_HOST_2 = 'localhost'
+#BITCOIN_TRUSTED_PORT_2 = 8332
+#BITCOIN_TRUSTED_USER_2 = 'user'
+#BITCOIN_TRUSTED_PASSWORD_2 = 'somepassword'
+
 # ******************** GENERAL SETTINGS ***************
 
 # Enable some verbose debug (logging requests and responses).
