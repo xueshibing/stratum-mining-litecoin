@@ -34,6 +34,20 @@ def setup(on_startup):
                              settings.BITCOIN_TRUSTED_PORT,
                              settings.BITCOIN_TRUSTED_USER,
                              settings.BITCOIN_TRUSTED_PASSWORD)
+
+    import stratum.logger
+    log = stratum.logger.get_logger('mining')
+
+    log.info('Waiting for bitcoin RPC...')
+
+    while True:
+        try:
+            result = (yield bitcoin_rpc.getblocktemplate())
+            if isinstance(result, dict):
+                log.info('Response from bitcoin RPC OK')
+                break
+        except:
+            time.sleep(1)
     
     # Check bitcoind
     # 	Check we can connect (sleep)
@@ -81,7 +95,7 @@ def setup(on_startup):
     # This is just failsafe solution when -blocknotify
     # mechanism is not working properly    
     BlockUpdater(registry, bitcoin_rpc)
-    
+
     log.info("MINING SERVICE IS READY")
     on_startup.callback(True)
 
