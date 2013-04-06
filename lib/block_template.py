@@ -48,7 +48,7 @@ class BlockTemplate(halfnode.CBlock):
         mt = merkletree.MerkleTree(txhashes)
 
         coinbase = self.coinbase_transaction_class(self.timestamper, self.coinbaser, data['coinbasevalue'],
-                        data['coinbaseaux']['flags'], data['height'], settings.COINBASE_EXTRAS)
+                        data['coinbaseaux']['flags'], data['height'], settings.COINBASE_EXTRAS, data['curtime'])
         
         self.height = data['height']
         self.nVersion = data['version']

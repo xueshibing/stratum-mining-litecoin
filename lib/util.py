@@ -209,9 +209,8 @@ def ser_number(n):
     s.append(n)
     return bytes(s)
 
-def script_to_address(addr):
-    d = address_to_pubkeyhash(addr)
-    if not d:
-        raise ValueError('invalid address')
-    (ver, pubkeyhash) = d
-    return b'\x76\xa9\x14' + pubkeyhash + b'\x88\xac'
+def script_to_pubkey(key):
+    if len(key) == 66: key = binascii.unhexlify(key)
+    if len(key) != 33: raise Exception('invalid pubkey passed to script_to_pubkey')
+    return b'\x21' + key + b'\xac'
+
