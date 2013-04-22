@@ -15,7 +15,7 @@ class DB_Mysql():
         if hasattr(settings, 'PASSWORD_SALT'):
             self.salt = settings.PASSWORD_SALT
         else:
-            raise Exception("PASSWORD_SALT isn't set, please set in config.py")
+            raise ValueError("PASSWORD_SALT isn't set, please set in config.py")
 
     def updateStats(self,averageOverTime):
         log.debug("Updating Stats")
