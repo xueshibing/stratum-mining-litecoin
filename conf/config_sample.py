@@ -82,6 +82,9 @@ ADMIN_PASSWORD_SHA256 = None
 
 IRC_NICK = None
 
+# Salt used when hashing passwords
+PASSWORD_SALT = 'some_crazy_string'
+
 # ******************** Database  *********************
 
 DATABASE_DRIVER = 'sqlite'	# Options: none, sqlite, postgresql or mysql
