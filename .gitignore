@@ -5,3 +5,5 @@ run
 pooldb.sqlite
 archives/*
 twistd.pid
+.project
+.pydevproject
