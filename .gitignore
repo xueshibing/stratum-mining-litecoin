@@ -4,3 +4,4 @@ NOTES
 run
 pooldb.sqlite
 archives/*
+twistd.pid
