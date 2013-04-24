@@ -7,7 +7,7 @@ import DBInterface
 dbi = DBInterface.DBInterface()
 dbi.clear_worker_diff()
 
-''' This is just a cusomized ring buffer '''
+''' This is just a customized ring buffer '''
 class SpeedBuffer:
 	def __init__(self,size_max):
 		self.max = size_max
@@ -78,7 +78,8 @@ class BasicShareLimiter(object):
 	self.worker_stats[worker_name]['last_rtc'] = ts
 	avg = self.worker_stats[worker_name]['buffer'].avg()
 	log.info("Checking Retarget for %s (%i) avg. %i target %i+-%i" % (worker_name,current_difficulty,avg,
-		self.target,self.variance) )
+		self.target,self.variance))
+	
 	if avg < 1:
 	    log.info("Reseting avg = 1 since it's SOOO low")
 	    avg = 1
@@ -107,6 +108,7 @@ class BasicShareLimiter(object):
 
 	self.worker_stats[worker_name]['buffer'].clear()
         session = connection_ref().get_session()
+        
 	session['prev_diff'] = session['difficulty']
 	session['prev_jobid'] = job_id
 	session['difficulty'] = new_diff

@@ -96,7 +96,7 @@ class StatsPage(Resource):
 		if wd["speed"] > 100:
 		    wc = "#0A0"
 		r+="<tr bgcolor=\"%s\"><td>%s</td><td>%s/%s</td><td>%s/%s</td><td>%s</td><tr>"%(
-			wc,wi,format(int(wd["speed"]),"n"),wd["difficulty"],format(int(wd["total_shares"]),"n"),
+			wc,wi,format(wd["speed"],"n"),wd["difficulty"],format(int(wd["total_shares"]),"n"),
 			format(int(wd["total_rejects"]),"n"),format(int(wd["total_found"]),"n"))
 	    r+="</table></td><td></td></tr>"
 	else :
