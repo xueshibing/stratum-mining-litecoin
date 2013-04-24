@@ -950,6 +950,7 @@ class DB_Mysql():
             CHANGE COLUMN `alive` `alive` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
             CHANGE COLUMN `difficulty` `difficulty` INT(10) UNSIGNED NOT NULL DEFAULT '0',
             ADD UNIQUE INDEX `pool_worker-username` (`username`(128) ASC),
+            ADD INDEX `pool_worker-alive` (`alive`),
             DROP INDEX `pool_worker_username`,
             DROP INDEX `id`
             """
