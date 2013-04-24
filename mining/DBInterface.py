@@ -53,6 +53,7 @@ class DBInterface():
             return DB_None.DB_None()
 
     def clearusercache(self):
+        log.debug("DBInterface.clearusercache called");
         self.usercache = {}
         self.usercacheclock = reactor.callLater(settings.DB_USERCACHE_TIME , self.clearusercache)
 
@@ -74,6 +75,8 @@ class DBInterface():
         self.scheduleImport()
 
     def run_import(self):
+        log.debug("DBInterface.run_import called");
+        
         self.do_import(self.dbi, False)
         
         if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
@@ -108,6 +111,8 @@ class DBInterface():
             'connections' : data['connections'], 'difficulty' : data['difficulty'] })
 
     def do_import(self, dbi, force):
+        log.debug("DBInterface.do_import called. force: %s, queue size: %s", 'yes' if force == True else 'no', self.q.qsize())
+        
         # Only run if we have data
         while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN:
             force = False
@@ -132,6 +137,7 @@ class DBInterface():
                 break  # Allows us to sleep a little
 
     def archive_shares(self, dbi):
+        log.debug("DBInterface.archive_shares called")
         found_time = dbi.archive_check()
         
         if found_time == 0:
