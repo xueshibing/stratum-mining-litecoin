@@ -550,6 +550,7 @@ class DB_Mysql():
             SELECT `username`, `speed`, `last_checkin`, `total_shares`,
               `total_rejects`, `total_found`, `alive`, `difficulty`
             FROM `pool_worker`
+            WHERE `id` > 0
             """
         )
         
