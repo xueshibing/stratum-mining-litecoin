@@ -43,46 +43,34 @@ class DB_Mysql():
         
         self.dbc.execute(
             """
-            SELECT `username`, SUM(`shares`.`difficulty`)
-            FROM `shares`
-            LEFT JOIN `pool_worker`
-              ON `shares`.`worker` = `pool_worker`.`id`
-            WHERE `time` > FROM_UNIXTIME(%(time)s)
-            GROUP BY `shares`.`worker`
+            UPDATE `pool_worker` pw
+            LEFT JOIN (
+                SELECT `worker`, ROUND(ROUND(SUM(`difficulty`)) * 4294967296) / %(average)s AS 'speed'
+                FROM `shares`
+                WHERE `time` > FROM_UNIXTIME(%(time)s)
+                GROUP BY `worker`
+            ) AS leJoin
+            ON leJoin.`worker` = pw.`id`
+            SET pw.`alive` = 1, 
+              pw.`speed` = leJoin.`speed`
+            WHERE pw.`id` = leJoin.`worker`
             """,
             {
-                "time": stime
+                "time": stime,
+                "average": int(averageOverTime) * 1000000
             }
         )
-        
-        total_speed = 0
-        
-        for name, shares in self.dbc.fetchall():
-            speed = int(int(shares) * pow(2, 32)) / ( int(averageOverTime) * 1000 * 1000)
-            total_speed += speed
-            
-            self.dbc.execute(
-                """
-                UPDATE `pool_worker`
-                SET `speed` = %(speed)s, 
-                  `alive` = 1
-                WHERE `username` = %(uname)s
-                """,
-                {
-                    "speed": speed,
-                    "uname": name
-                }
-            )
             
         self.dbc.execute(
             """
             UPDATE `pool`
-            SET `value` = %(value)s 
+            SET `value` = (
+                SELECT SUM(`speed`)
+                FROM `pool_worker`
+                WHERE `alive` = 1
+            )
             WHERE `parameter` = 'pool_speed'
-            """,
-            {
-                "value": total_speed
-            }
+            """
         )
         
         self.dbh.commit()
