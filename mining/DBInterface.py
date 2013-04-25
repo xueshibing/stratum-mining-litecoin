@@ -2,6 +2,7 @@ from twisted.internet import reactor, defer
 import time
 from datetime import datetime
 import Queue
+import signal
 
 from stratum import settings
 
@@ -26,6 +27,13 @@ class DBInterface():
         self.scheduleImport()
         
         self.next_force_import_time = time.time() + settings.DB_LOADER_FORCE_TIME
+    
+        signal.signal(signal.SIGINT, self.signal_handler)
+
+    def signal_handler(self, signal, frame):
+        print "SIGINT Detected, shutting down"
+        self.do_import(self.dbi, True)
+        reactor.stop()
 
     def set_bitcoinrpc(self, bitcoinrpc):
         self.bitcoinrpc = bitcoinrpc

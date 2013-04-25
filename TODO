@@ -4,8 +4,6 @@ SQL Connection pooling: sqlalchemy
 
 Add a "script" to add,list,disable users
 
-Flush all Pending shares on shutdown (I really don't know how to do this.)
-
 Variable difficulty should not be able to go higher than current difficulty
 
 Test NON-Local Coinbase with testnet in a box

@@ -70,7 +70,7 @@ def setup(on_startup):
                                 settings.INSTANCE_ID,
                                 MiningSubscription.on_template,
                                 Interfaces.share_manager.on_network_block)
-
+    
     # Template registry is the main interface between Stratum service
     # and pool core logic
     Interfaces.set_template_registry(registry)
@@ -79,7 +79,11 @@ def setup(on_startup):
     # This is just failsafe solution when -blocknotify
     # mechanism is not working properly    
     BlockUpdater(registry, bitcoin_rpc)
-
+    
     log.info("MINING SERVICE IS READY")
     on_startup.callback(True)
+
+
+
+
 
