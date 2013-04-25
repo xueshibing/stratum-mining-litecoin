@@ -252,11 +252,12 @@ class DB_Mysql():
             
             round_best_share = int(current_parameters['round_best_share'])
             difficulty = float(current_parameters['bitcoin_difficulty'])
+            round_shares = int(current_parameters['round_shares']) + total_shares
                 
             updates = [
                 {
                     "param": "round_shares",
-                    "value": int(current_parameters['round_shares']) + total_shares
+                    "value": round_shares
                 },
                 {
                     "param": "round_progress",

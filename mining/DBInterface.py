@@ -24,6 +24,8 @@ class DBInterface():
         self.nextStatsUpdate = 0
 
         self.scheduleImport()
+        
+        self.next_force_import_time = time.time() + settings.DB_LOADER_FORCE_TIME
 
     def set_bitcoinrpc(self, bitcoinrpc):
         self.bitcoinrpc = bitcoinrpc
@@ -71,7 +73,7 @@ class DBInterface():
     def run_import_thread(self):
         log.debug("run_import_thread current size: %d", self.q.qsize());
         
-        if self.q.qsize() >= settings.DB_LOADER_REC_MIN:  # Don't incur thread overhead if we're not going to run
+        if self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time:  # Don't incur thread overhead if we're not going to run
             reactor.callInThread(self.import_thread)
                 
         self.scheduleImport()
@@ -116,7 +118,9 @@ class DBInterface():
         log.debug("DBInterface.do_import called. force: %s, queue size: %s", 'yes' if force == True else 'no', self.q.qsize())
         
         # Only run if we have data
-        while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN:
+        while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time:
+            self.next_force_import_time = time.time() + settings.DB_LOADER_FORCE_TIME
+            
             force = False
             # Put together the data we want to import
             sqldata = []
