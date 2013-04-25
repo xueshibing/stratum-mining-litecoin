@@ -236,72 +236,47 @@ class DB_Mysql():
         if settings.DATABASE_EXTEND:
             self.dbc.execute(
                 """
-                SELECT `value` 
-                FROM `pool` 
-                WHERE `parameter` = 'round_shares'
-                """
-            )
-            
-            round_shares = int(self.dbc.fetchone()[0]) + total_shares
-            
-            self.dbc.execute(
-                """
-                UPDATE `pool` 
-                SET `value` = %(value)s 
-                WHERE `parameter` = 'round_shares'
-                """,
-                {
-                    "value": round_shares
-                }
-            )
-            
-            self.dbc.execute(
-                """
-                SELECT `value` 
+                SELECT `parameter`, `value` 
                 FROM `pool` 
                 WHERE `parameter` = 'round_best_share'
+                  OR `parameter` = 'round_shares'
+                  OR `parameter` = 'bitcoin_difficulty'
+                  OR `parameter` = 'round_progress'
                 """
             )
             
-            round_best_share = int(self.dbc.fetchone()[0])
+            current_parameters = {}
+            
+            for data in self.dbc.fetchall():
+                current_parameters[data[0]] = data[1]
+            
+            round_best_share = int(current_parameters['round_best_share'])
+            difficulty = float(current_parameters['bitcoin_difficulty'])
+                
+            updates = [
+                {
+                    "param": "round_shares",
+                    "value": int(current_parameters['round_shares']) + total_shares
+                },
+                {
+                    "param": "round_progress",
+                    "value": 0 if difficulty == 0 else (round_shares / difficulty) * 100
+                }
+            ]
             
             if best_diff > round_best_share:
-                self.dbc.execute(
-                    """
-                    UPDATE `pool` 
-                    SET `value` = %(value)s 
-                    WHERE `parameter` = 'round_best_share'
-                    """,
-                    {
-                        "value": best_diff
-                    }
-                )
-
-            self.dbc.execute(
-                """
-                SELECT `value` 
-                FROM `pool` 
-                WHERE `parameter` = 'bitcoin_difficulty'
-                """
-            )
+                updates.append({
+                    "param": "round_best_share",
+                    "value": best_diff
+                })
             
-            difficulty = float(self.dbc.fetchone()[0])
-
-            if difficulty == 0:
-                progress = 0
-            else:
-                progress = (round_shares / difficulty) * 100
-                
-            
-            self.dbc.execute(
+            self.dbc.executemany(
                 """
                 UPDATE `pool` 
                 SET `value` = %(value)s
-                WHERE `parameter` = 'round_progress'
+                WHERE `parameter` = %(param)s
                 """,
-                {
-                    "value": progress
-                }
+                updates
             )
         
             for k, v in checkin_times.items():
