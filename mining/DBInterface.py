@@ -69,6 +69,8 @@ class DBInterface():
             self.queueclock = reactor.callLater(settings.DB_LOADER_CHECKTIME , self.run_import)
     
     def run_import_thread(self):
+        log.debug("run_import_thread current size: %d", self.q.qsize());
+        
         if self.q.qsize() >= settings.DB_LOADER_REC_MIN:  # Don't incur thread overhead if we're not going to run
             reactor.callInThread(self.import_thread)
                 

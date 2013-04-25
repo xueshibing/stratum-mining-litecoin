@@ -254,7 +254,7 @@ class DB_Mysql():
                     "value": round_shares
                 }
             )
-
+            
             self.dbc.execute(
                 """
                 SELECT `value` 
@@ -292,6 +292,7 @@ class DB_Mysql():
             else:
                 progress = (round_shares / difficulty) * 100
                 
+            
             self.dbc.execute(
                 """
                 UPDATE `pool` 
@@ -310,7 +311,7 @@ class DB_Mysql():
                     SET `last_checkin` = FROM_UNIXTIME(%(time)s), 
                       `total_shares` = `total_shares` + %(shares)s,
                       `total_rejects` = `total_rejects` + %(rejects)s
-                    WHERE `username` = (SELECT `id` FROM `pool_worker` WHERE `username` = %(uname)s)
+                    WHERE `username` = %(uname)s
                     """,
                     {
                         "time": v["time"],
@@ -319,7 +320,7 @@ class DB_Mysql():
                         "uname": k
                     }
                 )
-
+            
         self.dbh.commit()
 
 
