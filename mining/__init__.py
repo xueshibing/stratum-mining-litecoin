@@ -33,30 +33,31 @@ def setup(on_startup):
     bitcoin_rpc = BitcoinRPCManager()
     
     # Check bitcoind
-    # 	Check we can connect (sleep)
+    #         Check we can connect (sleep)
     # Check the results:
-    #	- getblocktemplate is avalible	(Die if not)
-    #	- we are not still downloading the blockchain	(Sleep)
+    #         - getblocktemplate is avalible        (Die if not)
+    #         - we are not still downloading the blockchain        (Sleep)
     log.info("Connecting to bitcoind...")
     while True:
-	try:
-	    result = (yield bitcoin_rpc.getblocktemplate())
-	    if isinstance(result, dict):
-		if result['version'] == 2:
-		    break
-	except Exception, e:
-	    if isinstance(e[2], str):
-		if isinstance(json.loads(e[2])['error']['message'],str):
-		    error = json.loads(e[2])['error']['message']
-		    if error == "Method not found":
-			log.error("Bitcoind does not support getblocktemplate!!! (time to upgrade.)")
-			reactor.stop()
-		    elif error == "Bitcoin is downloading blocks...":
-			log.error("Bitcoind downloading blockchain... will check back in 30 sec")
-			time.sleep(29)
-		    else:
-			log.error("Bitcoind Error: %s", error)
-	time.sleep(1)		# If we didn't get a result or the connect failed
+        try:
+            result = (yield bitcoin_rpc.getblocktemplate())
+            if isinstance(result, dict):
+                if result['version'] == 2:
+                    break
+        except Exception, e:
+            if isinstance(e[2], str):
+                if isinstance(json.loads(e[2])['error']['message'], str):
+                    error = json.loads(e[2])['error']['message']
+                    if error == "Method not found":
+                        log.error("Bitcoind does not support getblocktemplate!!! (time to upgrade.)")
+                        reactor.stop()
+                    elif error == "Bitcoin is downloading blocks...":
+                        log.error("Bitcoind downloading blockchain... will check back in 30 sec")
+                        time.sleep(29)
+                    else:
+                        log.error("Bitcoind Error: %s", error)
+        time.sleep(1)  # If we didn't get a result or the connect failed
+        
     log.info('Connected to bitcoind - Ready to GO!')
 
     # Start the coinbaser

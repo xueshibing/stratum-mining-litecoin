@@ -83,13 +83,13 @@ class DBInterface():
         
         self.do_import(self.dbi, False)
         
-        if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
+        if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate:
             self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
             self.dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
             d.addCallback(self._update_pool_info)
             
-            if settings.ARCHIVE_SHARES :
+            if settings.ARCHIVE_SHARES:
                 self.archive_shares(self.dbi)
                 
         self.scheduleImport()
@@ -99,7 +99,7 @@ class DBInterface():
         dbi = self.connectDB()        
         self.do_import(dbi, False)
         
-        if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate :
+        if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate:
             self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
             dbi.updateStats(settings.DB_STATS_AVG_TIME)
             d = self.bitcoinrpc.getinfo()
@@ -126,7 +126,7 @@ class DBInterface():
             sqldata = []
             datacnt = 0
             
-            while self.q.empty() == False and datacnt < settings.DB_LOADER_REC_MAX :
+            while self.q.empty() == False and datacnt < settings.DB_LOADER_REC_MAX:
                 datacnt += 1
                 data = self.q.get()
                 sqldata.append(data)
@@ -165,7 +165,7 @@ class DBInterface():
                 
             filename = filename + ".csv"
 
-            if settings.ARCHIVE_FILE_COMPRESS == 'gzip' :
+            if settings.ARCHIVE_FILE_COMPRESS == 'gzip':
                 import gzip
                 filename = filename + ".gz"
                 filehandle = gzip.open(filename, 'a')        
@@ -216,12 +216,12 @@ class DBInterface():
         
         wid = username + ":-:" + password
         
-        if wid in self.usercache :
+        if wid in self.usercache:
             return True
-        elif self.dbi.check_password(username, password) :
+        elif self.dbi.check_password(username, password):
             self.usercache[wid] = 1
             return True
-        elif settings.USERS_AUTOADD == True :
+        elif settings.USERS_AUTOADD == True:
             self.insert_user(username, password)
             self.usercache[wid] = 1
             return True
