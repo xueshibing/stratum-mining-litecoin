@@ -63,7 +63,7 @@ class DBInterface():
             return DB_None.DB_None()
 
     def clearusercache(self):
-        log.debug("DBInterface.clearusercache called");
+        log.debug("DBInterface.clearusercache called")
         self.usercache = {}
         self.usercacheclock = reactor.callLater(settings.DB_USERCACHE_TIME , self.clearusercache)
 
@@ -79,7 +79,7 @@ class DBInterface():
             self.queueclock = reactor.callLater(settings.DB_LOADER_CHECKTIME , self.run_import)
     
     def run_import_thread(self):
-        log.debug("run_import_thread current size: %d", self.q.qsize());
+        log.debug("run_import_thread current size: %d", self.q.qsize())
         
         if self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time:  # Don't incur thread overhead if we're not going to run
             reactor.callInThread(self.import_thread)
@@ -87,7 +87,7 @@ class DBInterface():
         self.scheduleImport()
 
     def run_import(self):
-        log.debug("DBInterface.run_import called");
+        log.debug("DBInterface.run_import called")
         
         self.do_import(self.dbi, False)
         
