@@ -65,7 +65,7 @@ class DB_Mysql():
             """
             UPDATE `pool`
             SET `value` = (
-                SELECT SUM(`speed`)
+                SELECT IFNULL(SUM(`speed`), 0)
                 FROM `pool_worker`
                 WHERE `alive` = 1
             )
