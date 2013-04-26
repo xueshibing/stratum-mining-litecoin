@@ -111,6 +111,8 @@ DB_LOADER_CHECKTIME = 15	# How often we check to see if we should run the loader
 DB_LOADER_REC_MIN = 10		# Min Records before the bulk loader fires
 DB_LOADER_REC_MAX = 50		# Max Records the bulk loader will commit at a time
 
+DB_LOADER_FORCE_TIME = 300      # How often the cache should be flushed into the DB regardless of size.
+
 DB_STATS_AVG_TIME = 300		# When using the DATABASE_EXTEND option, average speed over X sec
 				#	Note: this is also how often it updates
 DB_USERCACHE_TIME = 600		# How long the usercache is good for before we refresh
