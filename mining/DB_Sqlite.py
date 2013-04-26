@@ -148,9 +148,7 @@ class DB_Sqlite():
 	self.dbh.commit()
 
     def update_user(self,username,password):
-	log.debug("Updating Username/Password")
-	self.dbc.execute("update pool_worker set password = :pass where username = :user", {'pass':password,'user':username})	
-	self.dbh.commit()
+        raise NotImplementedError('Not implemented for SQLite')
 
     def check_password(self,username,password):
 	log.debug("Checking Username/Password")

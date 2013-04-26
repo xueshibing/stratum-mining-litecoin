@@ -65,7 +65,11 @@ class RestResource(Resource):
         
         self.path_or_id = self.get_path_id(request)
         
-        if request.method == 'PUT' or request.method == 'DELETE' and self.path_or_id == '':
+        if request.method == 'POST' and self.path_or_id != '':
+            request.setResponseCode(405)
+            return '"Cannot call POST on a resource with an identifier"'
+        
+        if (request.method == 'PUT' or request.method == 'DELETE') and self.path_or_id == '':
             request.setResponseCode(405)
             return '"Cannot call PUT or DELETE without an identifier"'
         
@@ -128,10 +132,42 @@ class UsersResource(RestResource):
             user = dbi.get_user(self.path_or_id)
             return self.output_item(request, user)
         
+        
     def render_DELETE(self, request):
         dbi.delete_user(self.path_or_id)
         return '"OK"'
     
+    
+    def render_POST(self, request):
+        body = request.content.read()
+        object = json.loads(body)
+        
+        if not 'password' in object or not 'username' in object:
+            request.setResponseCode(400)
+            return '"You must specify a username and pasword"'
+            
+        try:
+            username = dbi.insert_user(object['username'], object['password'])
+            request.setHeader('Location', '/users/%s' % username)
+            
+            return '"OK"'
+        except:
+            request.setResponseCode(409)
+            return '"Username taken"'
+    
+    def render_PUT(self, request):
+        user = dbi.get_user(self.path_or_id)
+        
+        if user is None:
+            return self.output_item(request, None)
+            
+        body = request.content.read()
+        object = json.loads(body)
+        
+        if 'password' in object:
+            dbi.update_user(self.path_or_id, object['password'])
+        
+        return '"OK"'
         
 
 if settings.ADMIN_PORT is not None:

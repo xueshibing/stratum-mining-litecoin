@@ -193,14 +193,24 @@ class DB_Postgresql():
         self.dbc.execute("insert into pool_worker (username,password) VALUES (%s,%s)",
                 (username, m.hexdigest() ))
         self.dbh.commit()
+        
+        return str(username)
 
-    def update_user(self,username,password):
+    def update_user(self, id_or_username, password):
         log.debug("Updating Username/Password")
         m = hashlib.sha1()
         m.update(password)
         m.update(self.salt)
-        self.dbc.execute("update pool_worker set password = %s where username = %s",
-                (m.hexdigest(), username ))
+        self.dbc.execute(
+            """
+            update pool_worker set password = %(pass)s where id = %(id)s or username = %(uname)s
+            """,
+            {
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username,
+                "pass": m.hexdigest()
+            }
+        )
         self.dbh.commit()
 
     def update_worker_diff(self,username,diff):

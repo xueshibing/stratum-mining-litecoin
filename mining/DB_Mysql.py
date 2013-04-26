@@ -307,7 +307,11 @@ class DB_Mysql():
             SET `upstream_result` = %(result)s,
               `solution` = %(solution)s
             WHERE `time` = FROM_UNIXTIME(%(time)s)
-              AND `username` = (SELECT `id` FROM `pool_worker` WHERE `username` = %(uname)s)
+              AND `username` = (
+                  SELECT `id` 
+                  FROM `pool_worker` 
+                  WHERE `username` = %(uname)s
+              )
             LIMIT 1
             """,
             {
@@ -422,7 +426,13 @@ class DB_Mysql():
             """
             UPDATE `shares`
             SET `worker` = 0
-            WHERE `worker` = (SELECT `id` FROM `pool_worker` WHERE `id` = %(id)s OR `username` = %(uname)s LIMIT 1)
+            WHERE `worker` = (
+                SELECT `id` 
+                FROM `pool_worker` 
+                WHERE `id` = %(id)s 
+                  OR `username` = %(uname)s
+                LIMIT 1
+            )
             """,
             {
                 "id": id_or_username if id_or_username.isdigit() else -1,
@@ -461,18 +471,22 @@ class DB_Mysql():
         )
         
         self.dbh.commit()
+        
+        return str(username)
 
-    def update_user(self, username, password):
-        log.debug("Updating password for user %s", username);
+    def update_user(self, id_or_username, password):
+        log.debug("Updating password for user %s", id_or_username);
         
         self.dbc.execute(
             """
             UPDATE `pool_worker`
             SET `password` = %(pass)s
-            WHERE `username` = %(uname)s
+            WHERE `id` = %(id)s
+              OR `username` = %(uname)s
             """,
             {
-                "uname": username, 
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username,
                 "pass": self.hash_pass(password)
             }
         )
