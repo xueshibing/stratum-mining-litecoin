@@ -412,16 +412,33 @@ class DB_Mysql():
         return user
         
 
-    def delete_user(self, username):
-        log.debug("Deleting user %s", username)
+    def delete_user(self, id_or_username):
+        if id_or_username.isdigit() and id_or_username == '0':
+            raise Exception('You cannot delete that user')
+        
+        log.debug("Deleting user with id or username of %s", id_or_username)
+        
+        self.dbc.execute(
+            """
+            UPDATE `shares`
+            SET `worker` = 0
+            WHERE `worker` = (SELECT `id` FROM `pool_worker` WHERE `id` = %(id)s OR `username` = %(uname)s LIMIT 1)
+            """,
+            {
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username
+            }
+        )
         
         self.dbc.execute(
             """
             DELETE FROM `pool_worker`
-            WHERE `username` = %(uname)s
+            WHERE `id` = %(id)s
+              OR `username` = %(uname)s
             """, 
             {
-                "uname": username
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username
             }
         )
         

@@ -13,6 +13,9 @@ from pprint import pprint
 
 from stratum import settings
 
+import stratum.logger
+log = stratum.logger.get_logger('Admin Interface')
+
 import mining.DBInterface
 import sha
 dbi = mining.DBInterface.DBInterface()
@@ -28,13 +31,19 @@ class JSONDateTimeEncoder(json.JSONEncoder):
         
         
 class RestResource(Resource):
+    path_or_id = '';
+    
     def __init__(self):
         Resource.__init__(self)
         self.putChild("", self)
         self.putChild('favicon.ico', static.File('statics/bitcoin.ico', defaultType='image/vnd.microsoft.icon') )
-    
+        
+    def get_path_id(self, request):
+        return request.path.replace('/' + "/".join(request.prepath), '').strip('/')
     
     def render(self, request):
+        request.setHeader('Content-Type', 'application/json; charset=utf8')
+        
         user = request.getUser()
         passwd = request.getPassword()
         
@@ -51,13 +60,16 @@ class RestResource(Resource):
             if isinstance(self.children[c], RestResource) and c != '':
                 links.append('</%s>; rel="%s"' % (c, c))
                 
-        request.setHeader('Link', ", ".join(links))
+        if len(links) > 0:
+            request.setHeader('Link', ", ".join(links))
+        
+        self.path_or_id = self.get_path_id(request)
+        
+        if request.method == 'PUT' or request.method == 'DELETE' and self.path_or_id == '':
+            request.setResponseCode(405)
+            return '"Cannot call PUT or DELETE without an identifier"'
         
         return Resource.render(self, request)
-        
-    
-    def get_path(self, request):
-        return request.path.replace('/users', '').strip('/')
         
         
     def output_item(self, request, item):
@@ -102,8 +114,6 @@ class AdminInterface(RestResource):
     
     
     def render_GET(self, request):
-        request.setHeader('Content-Type', 'application/json; charset=utf8')
-        
         return ''
     
     
@@ -111,18 +121,17 @@ class AdminInterface(RestResource):
 class UsersResource(RestResource):
     isLeaf = True
     
-    
     def render_GET(self, request):
-        request.setHeader('Content-Type', 'application/json; charset=utf8')
-        
-        path = request.path.replace('/users', '').strip('/')
-        
-        if len(path) == 0:
+        if self.path_or_id == '':
             return self.output_list(request, dbi.list_users)
         else:
-            user = dbi.get_user(path)
+            user = dbi.get_user(self.path_or_id)
             return self.output_item(request, user)
         
+    def render_DELETE(self, request):
+        dbi.delete_user(self.path_or_id)
+        return '"OK"'
+    
         
 
 if settings.ADMIN_PORT is not None:

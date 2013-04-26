@@ -139,10 +139,8 @@ class DB_Sqlite():
     def list_users(self):
         raise NotImplementedError('Not implemented for SQLite')
 
-    def delete_user(self,username):
-	log.debug("Deleting Username")
-	self.dbc.execute("delete from pool_worker where username = :user", {'user':username})	
-	self.dbh.commit()
+    def delete_user(self,id_or_username):
+        raise NotImplementedError('Not implemented for SQLite')
 
     def insert_user(self,username,password):
 	log.debug("Adding Username/Password")

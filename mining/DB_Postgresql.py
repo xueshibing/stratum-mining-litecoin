@@ -172,9 +172,17 @@ class DB_Postgresql():
             for result in results:
                 yield result
 
-    def delete_user(self,username):
+    def delete_user(self, id_or_username):
         log.debug("Deleting Username")
-        self.dbc.execute("delete from pool_worker where username = %s", [username])
+        self.dbc.execute(
+            """
+            delete from pool_worker where id = %(id)s or username = %(uname)s
+            """,
+            {
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username
+            }
+        )
         self.dbh.commit()
 
     def insert_user(self,username,password):
