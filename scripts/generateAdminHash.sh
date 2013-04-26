@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "x$1" == "x" ]; then
 	echo "	Usage: $0 <admin Password>"
@@ -6,4 +6,3 @@ if [ "x$1" == "x" ]; then
 	fi
 
 echo -n "$1" | sha256sum | cut -f1 -d' '
-

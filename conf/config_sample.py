@@ -58,27 +58,18 @@ HOSTNAME = 'localhost'
 
 # Port used for Socket transport. Use 'None' for disabling the transport.
 LISTEN_SOCKET_TRANSPORT = 3333
-
 # Port used for HTTP Poll transport. Use 'None' for disabling the transport
 LISTEN_HTTP_TRANSPORT = None
-
 # Port used for HTTPS Poll transport
 LISTEN_HTTPS_TRANSPORT = None
-
 # Port used for WebSocket transport, 'None' for disabling WS
 LISTEN_WS_TRANSPORT = None
-
 # Port used for secure WebSocket, 'None' for disabling WSS
 LISTEN_WSS_TRANSPORT = None
 
 # Hostname and credentials for one trusted Bitcoin node ("Satoshi's client").
 # Stratum uses both P2P port (which is 8333 already) and RPC port
 # BITCOIN_TRUSTED_* 	-- in basic settings above
-
-# Use scripts/generateAdminHash.sh <password> to generate the hash
-# for calculating SHA256 of your preferred password
-ADMIN_PASSWORD_SHA256 = None
-#ADMIN_PASSWORD_SHA256 = '9e6c0c1db1e0dfb3fa5159deb4ecd9715b3c8cd6b06bd4a3ad77e9a8c5694219' # SHA256 of the password
 
 IRC_NICK = None
 
@@ -193,4 +184,20 @@ NOTIFY_EMAIL_SERVER = 'localhost'	# E-Mail Sender
 NOTIFY_EMAIL_USERNAME = ''		# E-Mail server SMTP Logon
 NOTIFY_EMAIL_PASSWORD = ''
 NOTIFY_EMAIL_USETLS = True
+
+
+
+# ******************** Admin settings *********************
+
+# Use scripts/generateAdminHash.sh <password> to generate the hash
+# for calculating SHA256 of your preferred password
+ADMIN_PASSWORD_SHA256 = '9e6c0c1db1e0dfb3fa5159deb4ecd9715b3c8cd6b06bd4a3ad77e9a8c5694219' # SHA256 of the password
+
+# If ADMIN_PORT is set, you can issue commands to that port to interact with 
+# the system for things such as user management. It's a JSON interface following 
+# REST principles, so '/users' returns a list of users, '/users/1' or '/users/username'
+# returns a single user. POSTs are done to lists (so /users), PUTs are done to 
+# items (so /users/1)
+ADMIN_PORT = 8085 #Port for JSON admin commands, None to disable
+
 

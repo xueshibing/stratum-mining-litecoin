@@ -13,6 +13,12 @@ class DB_None():
 
     def found_block(self,data):
 	log.debug("Found Block")
+    
+    def get_user(self, id_or_username):
+        log.debug("Get User")
+
+    def list_users(self):
+        log.debug("List Users")
 
     def delete_user(self,username):
 	log.debug("Deleting Username")

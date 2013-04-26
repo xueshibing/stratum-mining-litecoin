@@ -35,6 +35,8 @@ Interfaces.set_timestamper(TimestamperInterface())
 
 mining.setup(on_startup)
 
+from lib.admin_interface import AdminInterface
+
 if settings.DATABASE_EXTEND == True and settings.BASIC_STATS == True :
     from lib.basic_stats import BasicStats
     BasicStats(on_startup)

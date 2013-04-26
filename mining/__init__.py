@@ -19,10 +19,7 @@ def setup(on_startup):
     import stratum.logger
     log = stratum.logger.get_logger('mining')
 
-    from interfaces import Interfaces    
-    # Let's wait until share manager and worker manager boot up
-    (yield Interfaces.share_manager.on_load)
-    (yield Interfaces.worker_manager.on_load)
+    from interfaces import Interfaces
     
     from lib.block_updater import BlockUpdater
     from lib.template_registry import TemplateRegistry

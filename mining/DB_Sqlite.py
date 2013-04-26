@@ -132,6 +132,12 @@ class DB_Sqlite():
 		{'val':total_found,'parm':'pool_total_found'}
 		])
 	self.dbh.commit()
+                
+    def get_user(self, id_or_username):
+        raise NotImplementedError('Not implemented for SQLite')
+        
+    def list_users(self):
+        raise NotImplementedError('Not implemented for SQLite')
 
     def delete_user(self,username):
 	log.debug("Deleting Username")

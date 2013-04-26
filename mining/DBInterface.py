@@ -235,6 +235,12 @@ class DBInterface():
             return True
         
         return False
+    
+    def list_users(self):
+        return self.dbi.list_users()
+    
+    def get_user(self, id):
+        return self.dbi.get_user(id)
 
     def insert_user(self, username, password):        
         return self.dbi.insert_user(username, password)

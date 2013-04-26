@@ -5,6 +5,7 @@ import stratum.logger
 log = stratum.logger.get_logger('DB_Postgresql')
 
 import psycopg2
+from psycopg2 import extras
                 
 class DB_Postgresql():
     def __init__(self):
@@ -131,6 +132,45 @@ class DB_Postgresql():
                 (total_found,'pool_total_found')
                 ])
         self.dbh.commit()
+                
+    def get_user(self, id_or_username):
+        log.debug("Finding user with id or username of %s", id_or_username)
+        cursor = self.dbh.cursor(cursor_factory=extras.DictCursor)
+        
+        cursor.execute(
+            """
+            SELECT *
+            FROM pool_worker
+            WHERE id = %(id)s
+              OR username = %(uname)s
+            """,
+            {
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username
+            }
+        )
+        
+        user = cursor.fetchone()
+        cursor.close()
+        return user
+        
+    def list_users(self):
+        cursor = self.dbh.cursor(cursor_factory=extras.DictCursor)
+        cursor.execute(
+            """
+            SELECT *
+            FROM pool_worker
+            WHERE id > 0
+            """
+        )
+        
+        while True:
+            results = cursor.fetchmany()
+            if not results:
+                break
+            
+            for result in results:
+                yield result
 
     def delete_user(self,username):
         log.debug("Deleting Username")

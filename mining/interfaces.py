@@ -18,9 +18,7 @@ dbi.init_main()
 
 class WorkerManagerInterface(object):
     def __init__(self):
-        # Fire deferred when manager is ready
-        self.on_load = defer.Deferred()
-        self.on_load.callback(True)
+        return
         
     def authorize(self, worker_name, worker_password):
         # Important NOTE: This is called on EVERY submitted share. So you'll need caching!!!
@@ -41,9 +39,6 @@ class ShareLimiterInterface(object):
  
 class ShareManagerInterface(object):
     def __init__(self):
-        # Fire deferred when manager is ready
-        self.on_load = defer.Deferred()
-        self.on_load.callback(True)
         self.block_height = 0
         self.prev_hash = 0
     
@@ -85,7 +80,7 @@ class PredictableTimestamperInterface(TimestamperInterface):
     def time(self):
         self.delta += 1
         return self.start_time + self.delta
-        
+
 class Interfaces(object):
     worker_manager = None
     share_manager = None

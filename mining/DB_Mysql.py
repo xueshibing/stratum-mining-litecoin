@@ -13,7 +13,6 @@ class DB_Mysql():
         self.dbh = MySQLdb.connect(settings.DB_MYSQL_HOST, 
             settings.DB_MYSQL_USER, settings.DB_MYSQL_PASS, 
             settings.DB_MYSQL_DBNAME)
-        
         self.dbc = self.dbh.cursor()
         
         if hasattr(settings, 'PASSWORD_SALT'):
@@ -370,6 +369,48 @@ class DB_Mysql():
             )
             
         self.dbh.commit()
+        
+    def list_users(self):
+        cursor = self.dbh.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(
+            """
+            SELECT *
+            FROM `pool_worker`
+            WHERE `id`> 0
+            """
+        )
+        
+        while True:
+            results = cursor.fetchmany()
+            if not results:
+                break
+            
+            for result in results:
+                yield result
+                
+        cursor.close()
+                
+    def get_user(self, id_or_username):
+        log.debug("Finding user with id or username of %s", id_or_username)
+        cursor = self.dbh.cursor(MySQLdb.cursors.DictCursor)
+        
+        cursor.execute(
+            """
+            SELECT *
+            FROM `pool_worker`
+            WHERE `id` = %(id)s
+              OR `username` = %(uname)s
+            """,
+            {
+                "id": id_or_username if id_or_username.isdigit() else -1,
+                "uname": id_or_username
+            }
+        )
+        
+        user = cursor.fetchone()
+        cursor.close()
+        return user
+        
 
     def delete_user(self, username):
         log.debug("Deleting user %s", username)
