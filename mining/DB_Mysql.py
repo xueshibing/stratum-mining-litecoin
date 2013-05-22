@@ -19,7 +19,33 @@ class DB_Mysql():
             self.salt = settings.PASSWORD_SALT
         else:
             raise ValueError("PASSWORD_SALT isn't set, please set in config.py")
-        
+            
+    def execute(self, query, args=None):
+        try:
+            self.dbc.execute(query, args)
+        except MySQLdb.OperationalError:
+            log.debug("MySQL connection lost during execute, attempting reconnect")
+            
+            self.dbh = MySQLdb.connect(settings.DB_MYSQL_HOST, 
+                settings.DB_MYSQL_USER, settings.DB_MYSQL_PASS, 
+                settings.DB_MYSQL_DBNAME)
+            self.dbc = self.dbh.cursor()
+            
+            self.dbc.execute(query, args)
+            
+    def executemany(self, query, args=None):
+        try:
+            self.dbc.executemany(query, args)
+        except MySQLdb.OperationalError:
+            log.debug("MySQL connection lost during executemany, attempting reconnect")
+            			
+            self.dbh = MySQLdb.connect(settings.DB_MYSQL_HOST, 
+                settings.DB_MYSQL_USER, settings.DB_MYSQL_PASS, 
+                settings.DB_MYSQL_DBNAME)
+            self.dbc = self.dbh.cursor()
+            
+            self.dbc.executemany(query, args)
+    
     def hash_pass(self, password):
         m = hashlib.sha1()
         m.update(password)
@@ -30,7 +56,7 @@ class DB_Mysql():
     def updateStats(self, averageOverTime):
         log.debug("Updating Stats")
         # Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool_worker`
             SET `speed` = 0, 
@@ -40,7 +66,7 @@ class DB_Mysql():
         
         stime = '%.0f' % (time.time() - averageOverTime);
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool_worker` pw
             LEFT JOIN (
@@ -60,7 +86,7 @@ class DB_Mysql():
             }
         )
             
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool`
             SET `value` = (
@@ -76,7 +102,7 @@ class DB_Mysql():
     
     def archive_check(self):
         # Check for found shares to archive
-        self.dbc.execute(
+        self.execute(
             """
             SELECT `time`
             FROM `shares` 
@@ -94,7 +120,7 @@ class DB_Mysql():
         return data[0]
 
     def archive_found(self, found_time):
-        self.dbc.execute(
+        self.execute(
             """
             INSERT INTO `shares_archive_found`
             SELECT s.`id`, s.`time`, s.`rem_host`, pw.`id`, s.`our_result`, 
@@ -114,7 +140,7 @@ class DB_Mysql():
         self.dbh.commit()
 
     def archive_to_db(self, found_time):
-        self.dbc.execute(
+        self.execute(
             """
             INSERT INTO `shares_archive`
             SELECT s.`id`, s.`time`, s.`rem_host`, pw.`id`, s.`our_result`, 
@@ -133,7 +159,7 @@ class DB_Mysql():
         self.dbh.commit()
 
     def archive_cleanup(self, found_time):
-        self.dbc.execute(
+        self.execute(
             """
             DELETE FROM `shares` 
             WHERE `time` <= FROM_UNIXTIME(%(time)s)
@@ -146,7 +172,7 @@ class DB_Mysql():
         self.dbh.commit()
 
     def archive_get_shares(self, found_time):
-        self.dbc.execute(
+        self.execute(
             """
             SELECT *
             FROM `shares` 
@@ -189,7 +215,7 @@ class DB_Mysql():
                 if v[10] > best_diff:
                     best_diff = v[10]
 
-                self.dbc.execute(
+                self.execute(
                     """
                     INSERT INTO `shares` 
                     (time, rem_host, worker, our_result, upstream_result, 
@@ -213,7 +239,7 @@ class DB_Mysql():
                     }
                 )
             else:
-                self.dbc.execute(
+                self.execute(
                     """
                     INSERT INTO `shares`
                     (time, rem_host, worker, our_result, 
@@ -233,7 +259,7 @@ class DB_Mysql():
                 )
 
         if settings.DATABASE_EXTEND:
-            self.dbc.execute(
+            self.execute(
                 """
                 SELECT `parameter`, `value` 
                 FROM `pool` 
@@ -270,7 +296,7 @@ class DB_Mysql():
                     "value": best_diff
                 })
             
-            self.dbc.executemany(
+            self.executemany(
                 """
                 UPDATE `pool` 
                 SET `value` = %(value)s
@@ -280,7 +306,7 @@ class DB_Mysql():
             )
         
             for k, v in checkin_times.items():
-                self.dbc.execute(
+                self.execute(
                     """
                     UPDATE `pool_worker`
                     SET `last_checkin` = FROM_UNIXTIME(%(time)s), 
@@ -301,7 +327,7 @@ class DB_Mysql():
 
     def found_block(self, data):
         # Note: difficulty = -1 here
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `shares`
             SET `upstream_result` = %(result)s,
@@ -323,7 +349,7 @@ class DB_Mysql():
         )
         
         if settings.DATABASE_EXTEND and data[5] == True:
-            self.dbc.execute(
+            self.execute(
                 """
                 UPDATE `pool_worker`
                 SET `total_found` = `total_found` + 1
@@ -333,7 +359,7 @@ class DB_Mysql():
                     "uname": data[0]
                 }
             )
-            self.dbc.execute(
+            self.execute(
                 """
                 SELECT `value`
                 FROM `pool`
@@ -342,7 +368,7 @@ class DB_Mysql():
             )
             total_found = int(self.dbc.fetchone()[0]) + 1
             
-            self.dbc.executemany(
+            self.executemany(
                 """
                 UPDATE `pool`
                 SET `value` = %(value)s
@@ -422,7 +448,7 @@ class DB_Mysql():
         
         log.debug("Deleting user with id or username of %s", id_or_username)
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `shares`
             SET `worker` = 0
@@ -440,7 +466,7 @@ class DB_Mysql():
             }
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             DELETE FROM `pool_worker`
             WHERE `id` = %(id)s
@@ -457,7 +483,7 @@ class DB_Mysql():
     def insert_user(self, username, password):
         log.debug("Adding new user %s", username)
         
-        self.dbc.execute(
+        self.execute(
             """
             INSERT INTO `pool_worker`
             (`username`, `password`)
@@ -477,7 +503,7 @@ class DB_Mysql():
     def update_user(self, id_or_username, password):
         log.debug("Updating password for user %s", id_or_username);
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool_worker`
             SET `password` = %(pass)s
@@ -496,7 +522,7 @@ class DB_Mysql():
     def update_worker_diff(self, username, diff):
         log.debug("Setting difficulty for %s to %s", username, diff)
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool_worker`
             SET `difficulty` = %(diff)s
@@ -514,7 +540,7 @@ class DB_Mysql():
         if settings.DATABASE_EXTEND == True:
             log.debug("Resetting difficulty for all workers")
             
-            self.dbc.execute(
+            self.execute(
                 """
                 UPDATE `pool_worker`
                 SET `difficulty` = 0
@@ -526,7 +552,7 @@ class DB_Mysql():
     def check_password(self, username, password):
         log.debug("Checking username/password for %s", username)
         
-        self.dbc.execute(
+        self.execute(
             """
             SELECT COUNT(*) 
             FROM `pool_worker`
@@ -547,7 +573,7 @@ class DB_Mysql():
         return False
 
     def update_pool_info(self, pi):
-        self.dbc.executemany(
+        self.executemany(
             """
             UPDATE `pool`
             SET `value` = %(value)s
@@ -580,7 +606,7 @@ class DB_Mysql():
         self.dbh.commit()
 
     def get_pool_stats(self):
-        self.dbc.execute(
+        self.execute(
             """
             SELECT * FROM `pool`
             """
@@ -594,7 +620,7 @@ class DB_Mysql():
         return ret
 
     def get_workers_stats(self):
-        self.dbc.execute(
+        self.execute(
             """
             SELECT `username`, `speed`, `last_checkin`, `total_shares`,
               `total_rejects`, `total_found`, `alive`, `difficulty`
@@ -628,7 +654,7 @@ class DB_Mysql():
         # Do we have our tables?
         shares_exist = False
         
-        self.dbc.execute(
+        self.execute(
             """
             SELECT COUNT(*)
             FROM INFORMATION_SCHEMA.STATISTICS
@@ -653,7 +679,7 @@ class DB_Mysql():
         current_version = 7
         
         while version < current_version:
-            self.dbc.execute(
+            self.execute(
                 """
                 SELECT `value`
                 FROM `pool`
@@ -670,7 +696,7 @@ class DB_Mysql():
 
     def update_version_1(self):
         if settings.DATABASE_EXTEND == True:
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE TABLE IF NOT EXISTS `shares`
                 (
@@ -691,13 +717,13 @@ class DB_Mysql():
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE INDEX `shares_username` ON `shares`(`username`(10))
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE TABLE IF NOT EXISTS `pool_worker`
                 (
@@ -711,13 +737,13 @@ class DB_Mysql():
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE INDEX `pool_worker_username` ON `pool_worker`(`username`(10))
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE TABLE IF NOT EXISTS `pool`
                 (
@@ -727,25 +753,25 @@ class DB_Mysql():
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 ALTER TABLE `pool_worker` ADD `total_shares` INTEGER DEFAULT 0
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 ALTER TABLE `pool_worker` ADD `total_rejects` INTEGER DEFAULT 0
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 ALTER TABLE `pool_worker` ADD `total_found` INTEGER DEFAULT 0
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 INSERT INTO `pool`
                 (parameter, value)
@@ -754,7 +780,7 @@ class DB_Mysql():
                 """
             )
         else:
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE TABLE IF NOT EXISTS `shares`
                 (
@@ -771,13 +797,13 @@ class DB_Mysql():
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE INDEX `shares_username` ON `shares`(`username`(10))
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE TABLE IF NOT EXISTS `pool_worker`
                 (
@@ -789,7 +815,7 @@ class DB_Mysql():
                 """
             )
             
-            self.dbc.execute(
+            self.execute(
                 """
                 CREATE INDEX `pool_worker_username` ON `pool_worker`(`username`(10))
                 """
@@ -801,7 +827,7 @@ class DB_Mysql():
     def update_version_2(self):
         log.info("running update 2")
         
-        self.dbc.executemany(
+        self.executemany(
             """
             INSERT INTO `pool` (`parameter`, `value`) VALUES (%s, %s)
             """,
@@ -818,7 +844,7 @@ class DB_Mysql():
             ]
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool`
             SET `value` = 3
@@ -831,7 +857,7 @@ class DB_Mysql():
     def update_version_3(self):
         log.info("running update 3")
         
-        self.dbc.executemany(
+        self.executemany(
             """
             INSERT INTO `pool` (`parameter`, `value`) VALUES (%s, %s)
             """,
@@ -841,13 +867,13 @@ class DB_Mysql():
             ]
         )
         
-        self.dbc.execute(
+        self.execute(
              """
              ALTER TABLE `pool_worker` ADD `alive` BOOLEAN
              """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool`
             SET `value` = 4
@@ -860,14 +886,14 @@ class DB_Mysql():
     def update_version_4(self):
         log.info("running update 4")
         
-        self.dbc.execute(
+        self.execute(
             """
             ALTER TABLE `pool_worker`
             ADD `difficulty` INTEGER DEFAULT 0
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             CREATE TABLE IF NOT EXISTS `shares_archive`
             (
@@ -888,7 +914,7 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             CREATE TABLE IF NOT EXISTS `shares_archive_found`
             (
@@ -909,7 +935,7 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool`
             SET `value` = 5
@@ -922,7 +948,7 @@ class DB_Mysql():
     def update_version_5(self):
         log.info("running update 5")
         
-        self.dbc.execute(
+        self.execute(
             """
             ALTER TABLE `pool`
             ADD PRIMARY KEY (`parameter`(100))
@@ -930,25 +956,25 @@ class DB_Mysql():
         )
         
         # Adjusting indicies on table: shares
-        self.dbc.execute(
+        self.execute(
             """
             DROP INDEX `shares_username` ON `shares`
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             CREATE INDEX `shares_time_username` ON `shares`(`time`, `username`(10))
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             CREATE INDEX `shares_upstreamresult` ON `shares`(`upstream_result`)
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool`
             SET `value` = 6
@@ -961,7 +987,7 @@ class DB_Mysql():
     def update_version_6(self):
         log.info("running update 6")
         
-        self.dbc.execute(
+        self.execute(
             """
             ALTER TABLE `pool`
             CHARACTER SET = utf8,
@@ -973,7 +999,7 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool_worker`
             SET `password` = SHA1(CONCAT(password, %(salt)s))
@@ -984,7 +1010,7 @@ class DB_Mysql():
             }
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             ALTER TABLE `pool_worker`
             CHARACTER SET = utf8,
@@ -1005,7 +1031,7 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             ALTER TABLE `shares`
             ADD COLUMN `worker` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 AFTER `username`,
@@ -1014,7 +1040,7 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `shares`
             JOIN `pool_worker`
@@ -1023,13 +1049,13 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO';
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             INSERT INTO `pool_worker`
             (`id`, `username`, `password`)
@@ -1038,13 +1064,13 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             SET SESSION sql_mode='';
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             ALTER TABLE `shares` 
               ADD CONSTRAINT `workerid`
@@ -1059,7 +1085,7 @@ class DB_Mysql():
             """
         )
         
-        self.dbc.execute(
+        self.execute(
             """
             UPDATE `pool` 
             SET `value` = 7
