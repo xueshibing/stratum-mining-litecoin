@@ -1,6 +1,7 @@
 from service import MiningService
 from subscription import MiningSubscription
 from twisted.internet import defer
+from twisted.internet.error import ConnectionRefusedError
 import time
 import simplejson as json
 from twisted.internet import reactor
@@ -41,6 +42,11 @@ def setup(on_startup):
             if isinstance(result, dict):
                 if result['version'] == 2:
                     break
+					
+        except ConnectionRefusedError, e:
+            log.error("Connection refused while trying to connect to bitcoin (are you BITCOIN_TRUSTED_* settings correct?)")
+            reactor.stop()
+			
         except Exception, e:
             if isinstance(e[2], str):
                 if isinstance(json.loads(e[2])['error']['message'], str):
