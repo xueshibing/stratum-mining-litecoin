@@ -333,7 +333,7 @@ class DB_Mysql():
             SET `upstream_result` = %(result)s,
               `solution` = %(solution)s
             WHERE `time` = FROM_UNIXTIME(%(time)s)
-              AND `username` = (
+              AND `worker` = (
                   SELECT `id` 
                   FROM `pool_worker` 
                   WHERE `username` = %(uname)s
