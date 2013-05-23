@@ -10,25 +10,34 @@ class DB_Mysql():
     def __init__(self):
         log.debug("Connecting to DB")
         
-        self.dbh = MySQLdb.connect(settings.DB_MYSQL_HOST, 
-            settings.DB_MYSQL_USER, settings.DB_MYSQL_PASS, 
-            settings.DB_MYSQL_DBNAME)
-        self.dbc = self.dbh.cursor()
+        required_settings = ['PASSWORD_SALT', 'DB_MYSQL_HOST', 
+                             'DB_MYSQL_USER', 'DB_MYSQL_PASS', 
+                             'DB_MYSQL_DBNAME', 'ARCHIVE_DELAY']
         
-        if hasattr(settings, 'PASSWORD_SALT'):
-            self.salt = settings.PASSWORD_SALT
-        else:
-            raise ValueError("PASSWORD_SALT isn't set, please set in config.py")
+        for setting_name in required_settings:
+            if not hasattr(settings, setting_name):
+                raise ValueError("%s isn't set, please set in config.py" % setting_name)
+        
+        self.salt = getattr(settings, 'PASSWORD_SALT')
+        self.database_extend = hasattr(settings, 'DATABASE_EXTEND') and getattr(settings, 'DATABASE_EXTEND') is True
+        
+        self.connect()
+        
+    def connect(self):
+        self.dbh = MySQLdb.connect(
+            getattr(settings, 'DB_MYSQL_HOST'), 
+            getattr(settings, 'DB_MYSQL_USER'),
+            getattr(settings, 'DB_MYSQL_PASS'), 
+            getattr(settings, 'DB_MYSQL_DBNAME')
+        )
+        self.dbc = self.dbh.cursor()
             
     def execute(self, query, args=None):
         try:
             self.dbc.execute(query, args)
         except MySQLdb.OperationalError:
             log.debug("MySQL connection lost during execute, attempting reconnect")
-            
-            self.dbh = MySQLdb.connect(settings.DB_MYSQL_HOST, 
-                settings.DB_MYSQL_USER, settings.DB_MYSQL_PASS, 
-                settings.DB_MYSQL_DBNAME)
+            self.connect()
             self.dbc = self.dbh.cursor()
             
             self.dbc.execute(query, args)
@@ -38,10 +47,7 @@ class DB_Mysql():
             self.dbc.executemany(query, args)
         except MySQLdb.OperationalError:
             log.debug("MySQL connection lost during executemany, attempting reconnect")
-            			
-            self.dbh = MySQLdb.connect(settings.DB_MYSQL_HOST, 
-                settings.DB_MYSQL_USER, settings.DB_MYSQL_PASS, 
-                settings.DB_MYSQL_DBNAME)
+            self.connect()
             self.dbc = self.dbh.cursor()
             
             self.dbc.executemany(query, args)
@@ -114,7 +120,7 @@ class DB_Mysql():
         
         data = self.dbc.fetchone()
         
-        if data is None or (data[0] + settings.ARCHIVE_DELAY) > time.time() :
+        if data is None or (data[0] + getattr(settings, 'ARCHIVE_DELAY')) > time.time():
             return False
         
         return data[0]
@@ -187,18 +193,16 @@ class DB_Mysql():
 
     def import_shares(self, data):
         log.debug("Importing Shares")
-#               0           1            2          3          4         5        6  7            8         9              10
-#        data: [worker_name,block_header,block_hash,difficulty,timestamp,is_valid,ip,block_height,prev_hash,invalid_reason,best_diff]
         checkin_times = {}
         total_shares = 0
         best_diff = 0
         
         for k, v in enumerate(data):
-            if settings.DATABASE_EXTEND :
+            if self.database_extend:
                 total_shares += v[3]
                 
                 if v[0] in checkin_times:
-                    if v[4] > checkin_times[v[0]] :
+                    if v[4] > checkin_times[v[0]]:
                         checkin_times[v[0]]["time"] = v[4]
                 else:
                     checkin_times[v[0]] = {
@@ -207,9 +211,9 @@ class DB_Mysql():
                         "rejects": 0
                     }
 
-                if v[5] == True :
+                if v[5] == True:
                     checkin_times[v[0]]["shares"] += v[3]
-                else :
+                else:
                     checkin_times[v[0]]["rejects"] += v[3]
 
                 if v[10] > best_diff:
@@ -258,7 +262,7 @@ class DB_Mysql():
                     }
                 )
 
-        if settings.DATABASE_EXTEND:
+        if self.database_extend:
             self.execute(
                 """
                 SELECT `parameter`, `value` 
@@ -348,7 +352,7 @@ class DB_Mysql():
             }
         )
         
-        if settings.DATABASE_EXTEND and data[5] == True:
+        if self.database_extend and data[5] == True:
             self.execute(
                 """
                 UPDATE `pool_worker`
@@ -537,7 +541,7 @@ class DB_Mysql():
         self.dbh.commit()
     
     def clear_worker_diff(self):
-        if settings.DATABASE_EXTEND == True:
+        if self.database_extend:
             log.debug("Resetting difficulty for all workers")
             
             self.execute(
@@ -633,14 +637,14 @@ class DB_Mysql():
         
         for data in self.dbc.fetchall():
             ret[data[0]] = {
-                "username" : data[0],
-                "speed" : int(data[1]),
-                "last_checkin" : time.mktime(data[2].timetuple()),
-                "total_shares" : int(data[3]),
-                "total_rejects" : int(data[4]),
-                "total_found" : int(data[5]),
-                "alive" : True if data[6] is 1 else False,
-                "difficulty" : int(data[7])
+                "username": data[0],
+                "speed": int(data[1]),
+                "last_checkin": time.mktime(data[2].timetuple()),
+                "total_shares": int(data[3]),
+                "total_rejects": int(data[4]),
+                "total_found": int(data[5]),
+                "alive": True if data[6] is 1 else False,
+                "difficulty": int(data[7])
             }
             
         return ret
@@ -650,9 +654,6 @@ class DB_Mysql():
 
     def check_tables(self):
         log.debug("Checking Tables")
-
-        # Do we have our tables?
-        shares_exist = False
         
         self.execute(
             """
@@ -662,16 +663,16 @@ class DB_Mysql():
               AND `table_name` = 'shares'
             """,
             {
-                "schema": settings.DB_MYSQL_DBNAME
+                "schema": getattr(settings, 'DB_MYSQL_DBNAME')
             }
         )
         
         data = self.dbc.fetchone()
         
-        if data[0] <= 0 :
+        if data[0] <= 0:
             self.update_version_1()        # no, we don't, so create them
             
-        if settings.DATABASE_EXTEND == True :
+        if self.database_extend:
             self.update_tables()
         
     def update_tables(self):
@@ -695,7 +696,7 @@ class DB_Mysql():
                 getattr(self, 'update_version_' + str(version) )()
 
     def update_version_1(self):
-        if settings.DATABASE_EXTEND == True:
+        if self.database_extend:
             self.execute(
                 """
                 CREATE TABLE IF NOT EXISTS `shares`

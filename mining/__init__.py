@@ -13,9 +13,9 @@ def setup(on_startup):
     want to use another Worker manager or Share manager,
     you should set proper reference to Interfaces class
     *before* you call setup() in the launcher script.'''
-
+    
     from stratum import settings
-
+        
     # Get logging online as soon as possible
     import stratum.logger
     log = stratum.logger.get_logger('mining')
@@ -42,11 +42,11 @@ def setup(on_startup):
             if isinstance(result, dict):
                 if result['version'] == 2:
                     break
-					
+
         except ConnectionRefusedError, e:
-            log.error("Connection refused while trying to connect to bitcoin (are you BITCOIN_TRUSTED_* settings correct?)")
+            log.error("Connection refused while trying to connect to bitcoin (are your BITCOIN_TRUSTED_* settings correct?)")
             reactor.stop()
-			
+
         except Exception, e:
             if isinstance(e[2], str):
                 if isinstance(json.loads(e[2])['error']['message'], str):
@@ -64,13 +64,13 @@ def setup(on_startup):
     log.info('Connected to bitcoind - Ready to GO!')
 
     # Start the coinbaser
-    coinbaser = SimpleCoinbaser(bitcoin_rpc, settings.CENTRAL_WALLET)
+    coinbaser = SimpleCoinbaser(bitcoin_rpc, getattr(settings, 'CENTRAL_WALLET'))
     (yield coinbaser.on_load)
     
     registry = TemplateRegistry(BlockTemplate,
                                 coinbaser,
                                 bitcoin_rpc,
-                                settings.INSTANCE_ID,
+                                getattr(settings, 'INSTANCE_ID'),
                                 MiningSubscription.on_template,
                                 Interfaces.share_manager.on_network_block)
     
