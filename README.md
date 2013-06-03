@@ -1,9 +1,13 @@
-stratum-mining
+stratum-mining-litecoin
 ==============
 
-Basic implementation of bitcoin mining pool using Stratum mining protocol.
+Basic implementation of litecoin mining pool using Stratum mining protocol.
 
-This fork includes database optimisations for MySQL and password hashing using a salt.
+This fork includes database optimisations for MySQL and password hashing using a salt. 
+
+This fork is currently in testing. Please let me know if there is anything broken. 
+
+Installation Instructions can be found in the INSTALL
 
 JSON API
 --------
@@ -38,5 +42,6 @@ http://mining.bitcoin.cz/stratum-mining.
 
 Original version by Slush
 Modified version by GeneralFault
+Modified version Wade Womersley (Media Skunk Works) ( Tips Welcome: 1FxBTbWR15WZp8vnru8N6zVsVBwigPAcdN )
 
-This version by Wade Womersley (Media Skunk Works) ( Tips Welcome: 1FxBTbWR15WZp8vnru8N6zVsVBwigPAcdN )
+This version was slightly modified by moopless to work for scrypt based coins based on the work done by viperaus
