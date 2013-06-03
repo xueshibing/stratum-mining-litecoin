@@ -22,6 +22,7 @@ class BitcoinRPC(object):
 	client.HTTPClientFactory.noisy = False
         
     def _call_raw(self, data):
+	client.Headers
         return client.getPage(
             url=self.bitcoin_url,
             method='POST',
@@ -39,7 +40,8 @@ class BitcoinRPC(object):
 
     @defer.inlineCallbacks
     def submitblock(self, block_hex):
-        resp = (yield self._call('submitblock', [block_hex,]))
+        #resp = (yield self._call('submitblock', [block_hex,]))
+        resp = (yield self._call('getblocktemplate', [{'mode': 'submit', 'data': block_hex}]))
         if json.loads(resp)['result'] == None:
             defer.returnValue(True)
         else:
@@ -52,7 +54,7 @@ class BitcoinRPC(object):
     
     @defer.inlineCallbacks
     def getblocktemplate(self):
-        resp = (yield self._call('getblocktemplate', []))
+        resp = (yield self._call('getblocktemplate', [{}]))
         defer.returnValue(json.loads(resp)['result'])
                                                   
     @defer.inlineCallbacks

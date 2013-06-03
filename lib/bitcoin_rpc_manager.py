@@ -20,17 +20,17 @@ class BitcoinRPCManager(object):
     
     def __init__(self):
 	self.conns = {}
-	self.conns[0] = BitcoinRPC(settings.BITCOIN_TRUSTED_HOST,
-                             settings.BITCOIN_TRUSTED_PORT,
-                             settings.BITCOIN_TRUSTED_USER,
-                             settings.BITCOIN_TRUSTED_PASSWORD)
+	self.conns[0] = BitcoinRPC(settings.LITECOIN_TRUSTED_HOST,
+                             settings.LITECOIN_TRUSTED_PORT,
+                             settings.LITECOIN_TRUSTED_USER,
+                             settings.LITECOIN_TRUSTED_PASSWORD)
 	self.curr_conn = 0
 	for x in range (1, 99):
-	    if hasattr(settings, 'BITCOIN_TRUSTED_HOST_' + str(x)) and hasattr(settings, 'BITCOIN_TRUSTED_PORT_' + str(x)) and hasattr(settings, 'BITCOIN_TRUSTED_USER_' + str(x)) and hasattr(settings, 'BITCOIN_TRUSTED_PASSWORD_' + str(x)):
-		self.conns[len(self.conns)] = BitcoinRPC(settings.__dict__['BITCOIN_TRUSTED_HOST_' + str(x)],
-							settings.__dict__['BITCOIN_TRUSTED_PORT_' + str(x)],
-							settings.__dict__['BITCOIN_TRUSTED_USER_' + str(x)],
-							settings.__dict__['BITCOIN_TRUSTED_PASSWORD_' + str(x)])
+	    if hasattr(settings, 'LITECOIN_TRUSTED_HOST_' + str(x)) and hasattr(settings, 'LITECOIN_TRUSTED_PORT_' + str(x)) and hasattr(settings, 'LITECOIN_TRUSTED_USER_' + str(x)) and hasattr(settings, 'LITECOIN_TRUSTED_PASSWORD_' + str(x)):
+		self.conns[len(self.conns)] = BitcoinRPC(settings.__dict__['LITECOIN_TRUSTED_HOST_' + str(x)],
+							settings.__dict__['LITECOIN_TRUSTED_PORT_' + str(x)],
+							settings.__dict__['LITECOIN_TRUSTED_USER_' + str(x)],
+							settings.__dict__['LITECOIN_TRUSTED_PASSWORD_' + str(x)])
 
     def next_connection(self):
 	time.sleep(1)
