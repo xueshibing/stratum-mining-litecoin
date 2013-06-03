@@ -58,7 +58,7 @@ class SimpleCoinbaser(object):
     
     def get_script_pubkey(self):
         if not self.is_valid:
-            # Try again, maybe bitcoind was down?
+            # Try again, maybe litecoind was down?
             self._validate()
             raise Exception("Coinbase address is not validated!")
         return util.script_to_address(self.address)    

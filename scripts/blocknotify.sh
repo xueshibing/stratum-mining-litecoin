@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Send notification to Stratum mining instance on localhost that there's new bitcoin block
 # You can use this script directly as an variable for -blocknotify argument:
-# 	./bitcoind -blocknotify="blocknotify.sh --password admin_password"
+# 	./litecoind -blocknotify="blocknotify.sh --password admin_password"
 # This is also very basic example how to use Stratum protocol in native Python
 
 import socket

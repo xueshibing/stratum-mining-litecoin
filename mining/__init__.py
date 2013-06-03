@@ -30,12 +30,12 @@ def setup(on_startup):
     
     bitcoin_rpc = BitcoinRPCManager()
     
-    # Check bitcoind
+    # Check litecoind
     #         Check we can connect (sleep)
     # Check the results:
     #         - getblocktemplate is avalible        (Die if not)
     #         - we are not still downloading the blockchain        (Sleep)
-    log.info("Connecting to bitcoind...")
+    log.info("Connecting to litecoind...")
     while True:
         try:
             result = (yield bitcoin_rpc.getblocktemplate())
@@ -44,7 +44,7 @@ def setup(on_startup):
                     break
 
         except ConnectionRefusedError, e:
-            log.error("Connection refused while trying to connect to bitcoin (are your BITCOIN_TRUSTED_* settings correct?)")
+            log.error("Connection refused while trying to connect to litecoin (are your LITECOIN_TRUSTED_* settings correct?)")
             reactor.stop()
 
         except Exception, e:
@@ -52,16 +52,16 @@ def setup(on_startup):
                 if isinstance(json.loads(e[2])['error']['message'], str):
                     error = json.loads(e[2])['error']['message']
                     if error == "Method not found":
-                        log.error("Bitcoind does not support getblocktemplate!!! (time to upgrade.)")
+                        log.error("Litecoind does not support getblocktemplate!!! (time to upgrade.)")
                         reactor.stop()
-                    elif error == "Bitcoin is downloading blocks...":
-                        log.error("Bitcoind downloading blockchain... will check back in 30 sec")
+                    elif error == "Litecoind is downloading blocks...":
+                        log.error("Litecoind downloading blockchain... will check back in 30 sec")
                         time.sleep(29)
                     else:
-                        log.error("Bitcoind Error: %s", error)
+                        log.error("Litecoind Error: %s", error)
         time.sleep(1)  # If we didn't get a result or the connect failed
         
-    log.info('Connected to bitcoind - Ready to GO!')
+    log.info('Connected to litecoind - Ready to GO!')
 
     # Start the coinbaser
     coinbaser = SimpleCoinbaser(bitcoin_rpc, getattr(settings, 'CENTRAL_WALLET'))

@@ -13,7 +13,7 @@ class BlockUpdater(object):
         This will call registry.update_block when new prevhash appear.
         
         This is just failback alternative when something
-        with ./bitcoind -blocknotify will go wrong. 
+        with ./litecoind -blocknotify will go wrong. 
     '''
     
     def __init__(self, registry, bitcoin_rpc):

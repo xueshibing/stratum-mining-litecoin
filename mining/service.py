@@ -24,7 +24,7 @@ class MiningService(GenericService):
     
     @admin
     def update_block(self):
-        '''Connect this RPC call to 'bitcoind -blocknotify' for 
+        '''Connect this RPC call to 'litecoind -blocknotify' for 
         instant notification about new block on the network.
         See blocknotify.sh in /scripts/ for more info.'''
         
@@ -98,7 +98,7 @@ class MiningService(GenericService):
             block_hash, difficulty, submit_time, True, ip, '', share_diff)
         
         if on_submit != None:
-            # Pool performs submitblock() to bitcoind. Let's hook
+            # Pool performs submitblock() to litecoind. Let's hook
             # to result and report it to share manager
             on_submit.addCallback(Interfaces.share_manager.on_submit_block,
                 worker_name, block_header, block_hash, submit_time, ip, share_diff)

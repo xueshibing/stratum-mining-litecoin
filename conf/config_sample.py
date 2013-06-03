@@ -9,26 +9,26 @@ You NEED to set the parameters in BASIC SETTINGS
 # ******************** BASIC SETTINGS ***************
 # These are the MUST BE SET parameters!
 
-CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local bitcoin address where money goes
+CENTRAL_WALLET = 'set_valid_addresss_in_config!'	# local litecoin address where money goes
 
-BITCOIN_TRUSTED_HOST = 'localhost'
-BITCOIN_TRUSTED_PORT = 8332
-BITCOIN_TRUSTED_USER = 'user'
-BITCOIN_TRUSTED_PASSWORD = 'somepassword'
+LITECOIN_TRUSTED_HOST = 'localhost'
+LITECOIN_TRUSTED_PORT = 8332
+LITECOIN_TRUSTED_USER = 'user'
+LITECOIN_TRUSTED_PASSWORD = 'somepassword'
 
 # ******************** BASIC SETTINGS ***************
-# Backup Bitcoind connections (consider having at least 1 backup)
+# Backup Litecoind connections (consider having at least 1 backup)
 # You can have up to 99
 
-#BITCOIN_TRUSTED_HOST_1 = 'localhost'
-#BITCOIN_TRUSTED_PORT_1 = 8332
-#BITCOIN_TRUSTED_USER_1 = 'user'
-#BITCOIN_TRUSTED_PASSWORD_1 = 'somepassword'
+#LITECOIN_TRUSTED_HOST_1 = 'localhost'
+#LITECOIN_TRUSTED_PORT_1 = 8332
+#LITECOIN_TRUSTED_USER_1 = 'user'
+#LITECOIN_TRUSTED_PASSWORD_1 = 'somepassword'
 
-#BITCOIN_TRUSTED_HOST_2 = 'localhost'
-#BITCOIN_TRUSTED_PORT_2 = 8332
-#BITCOIN_TRUSTED_USER_2 = 'user'
-#BITCOIN_TRUSTED_PASSWORD_2 = 'somepassword'
+#LITECOIN_TRUSTED_HOST_2 = 'localhost'
+#LITECOIN_TRUSTED_PORT_2 = 8332
+#LITECOIN_TRUSTED_USER_2 = 'user'
+#LITECOIN_TRUSTED_PASSWORD_2 = 'somepassword'
 
 # ******************** GENERAL SETTINGS ***************
 
@@ -69,7 +69,7 @@ LISTEN_WSS_TRANSPORT = None
 
 # Hostname and credentials for one trusted Bitcoin node ("Satoshi's client").
 # Stratum uses both P2P port (which is 8333 already) and RPC port
-# BITCOIN_TRUSTED_* 	-- in basic settings above
+# LITECOIN_TRUSTED_* 	-- in basic settings above
 
 IRC_NICK = None
 
@@ -120,7 +120,7 @@ USERS_CHECK_PASSWORD = False	# Check the workers password? (Many pools don't)
 COINBASE_EXTRAS = '/stratumPool/'			# Extra Descriptive String to incorporate in solved blocks
 ALLOW_NONLOCAL_WALLET = False				# Allow valid, but NON-Local wallet's
 
-# Bitcoind communication polling settings (In Seconds)
+# Litecoind communication polling settings (In Seconds)
 PREVHASH_REFRESH_INTERVAL = 5 	# How often to check for new Blocks
 				#	If using the blocknotify script (recommended) set = to MERKLE_REFRESH_INTERVAL
 				#	(No reason to poll if we're getting pushed notifications)
@@ -134,7 +134,7 @@ INSTANCE_ID = 31		# Not a clue what this is for... :P
 #  Again, Don't change unless you know what this is for.
 
 # Pool Target (Base Difficulty)
-POOL_TARGET = 1			# Pool-wide difficulty target int >= 1
+POOL_TARGET = 16			# Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
 VARIABLE_DIFF = True		# Master variable difficulty enable
