@@ -7,3 +7,5 @@ archives/*
 twistd.pid
 .project
 .pydevproject
+*.swp
+*.log
