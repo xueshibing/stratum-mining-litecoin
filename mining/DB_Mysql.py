@@ -496,7 +496,7 @@ class DB_Mysql():
             """,
             {
                 "uname": username, 
-                "pass": self.hash_pass(password)
+                "pass": password
             }
         )
         
@@ -517,7 +517,7 @@ class DB_Mysql():
             {
                 "id": id_or_username if id_or_username.isdigit() else -1,
                 "uname": id_or_username,
-                "pass": self.hash_pass(password)
+                "pass": password
             }
         )
         
@@ -565,7 +565,7 @@ class DB_Mysql():
             """,
             {
                 "uname": username, 
-                "pass": self.hash_pass(password)
+                "pass": password
             }
         )
         
