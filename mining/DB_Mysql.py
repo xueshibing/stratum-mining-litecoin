@@ -239,7 +239,7 @@ class DB_Mysql():
                         "reason": v[9],
                         "blocknum": v[7],
                         "hash": v[8],
-                        "difficulty": v[10]
+                        "difficulty": v[3]
                     }
                 )
             else:
