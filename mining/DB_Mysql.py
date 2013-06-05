@@ -732,6 +732,7 @@ class DB_Mysql():
                     `username` TEXT,
                     `password` TEXT,
                     `speed` INTEGER,
+                    `difficulty` INTEGER,
                     `last_checkin` TIMESTAMP
                 )
                 ENGINE=MYISAM
