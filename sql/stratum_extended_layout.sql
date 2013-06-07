@@ -19,10 +19,9 @@
 -- Table structure for table `pool`
 --
 
-DROP TABLE IF EXISTS `pool`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `pool` (
+CREATE TABLE IF NOT EXISTS `pool` (
   `parameter` varchar(128) NOT NULL,
   `value` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`parameter`)
@@ -43,10 +42,9 @@ UNLOCK TABLES;
 -- Table structure for table `pool_worker`
 --
 
-DROP TABLE IF EXISTS `pool_worker`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `pool_worker` (
+CREATE TABLE IF NOT EXISTS `pool_worker` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(512) NOT NULL,
   `password` char(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
@@ -67,10 +65,9 @@ CREATE TABLE `pool_worker` (
 -- Table structure for table `shares`
 --
 
-DROP TABLE IF EXISTS `shares`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `shares` (
+CREATE TABLE IF NOT EXISTS `shares` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `rem_host` text,
@@ -95,10 +92,9 @@ CREATE TABLE `shares` (
 -- Table structure for table `shares_archive`
 --
 
-DROP TABLE IF EXISTS `shares_archive`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `shares_archive` (
+CREATE TABLE IF NOT EXISTS `shares_archive` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `rem_host` text,
@@ -120,10 +116,9 @@ CREATE TABLE `shares_archive` (
 -- Table structure for table `shares_archive_found`
 --
 
-DROP TABLE IF EXISTS `shares_archive_found`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `shares_archive_found` (
+CREATE TABLE IF NOT EXISTS `shares_archive_found` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `rem_host` text,
