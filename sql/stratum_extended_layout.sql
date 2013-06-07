@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.31, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: fresh
+-- Host: localhost    Database: stratum
 -- ------------------------------------------------------
 -- Server version	5.5.31-0ubuntu0.12.04.1
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `pool` (
 
 LOCK TABLES `pool` WRITE;
 /*!40000 ALTER TABLE `pool` DISABLE KEYS */;
-INSERT INTO `pool` VALUES ('bitcoin_balance','0'),('bitcoin_blocks','0'),('bitcoin_connections','0'),('bitcoin_difficulty','0'),('bitcoin_infotime','0'),('DB Version','7'),('pool_speed','0'),('pool_total_found','0'),('round_best_share','0'),('round_progress','0'),('round_shares','0'),('round_start','1370609310.51321');
+INSERT INTO `pool` VALUES ('bitcoin_difficulty','0'),('bitcoin_infotime','1370628530.78521'),('DB Version','7'),('pool_speed','0'),('pool_total_found','0'),('round_best_share','11'),('round_progress','0'),('round_shares','18'),('round_start_time','1370628530.78521');
 /*!40000 ALTER TABLE `pool` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -49,16 +49,16 @@ CREATE TABLE IF NOT EXISTS `pool_worker` (
   `username` varchar(512) NOT NULL,
   `password` char(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `speed` int(10) unsigned NOT NULL DEFAULT '0',
-  `difficulty` int(10) unsigned NOT NULL DEFAULT '0',
   `last_checkin` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `total_shares` int(10) unsigned NOT NULL DEFAULT '0',
   `total_rejects` int(10) unsigned NOT NULL DEFAULT '0',
   `total_found` int(10) unsigned NOT NULL DEFAULT '0',
   `alive` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `difficulty` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `pool_worker-username` (`username`(128)),
   KEY `pool_worker-alive` (`alive`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `shares` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `rem_host` text,
-  `username` varchar(50) unsigned NOT NULL DEFAULT '0',
+  `worker` bigint(20) unsigned NOT NULL DEFAULT '0',
   `our_result` tinyint(1) DEFAULT NULL,
   `upstream_result` tinyint(1) DEFAULT NULL,
   `reason` text,
@@ -79,13 +79,12 @@ CREATE TABLE IF NOT EXISTS `shares` (
   `block_num` int(11) DEFAULT NULL,
   `prev_block_hash` text,
   `useragent` text,
-  `difficulty` int(11) DEFAULT '0',
+  `difficulty` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `shares_upstreamresult` (`upstream_result`),
   KEY `shares_time_worker` (`time`,`worker`),
-  KEY `shares_worker` (`worker`),
-  CONSTRAINT `workerid` FOREIGN KEY (`worker`) REFERENCES `pool_worker` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  KEY `shares_worker` (`worker`)
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -144,4 +143,4 @@ CREATE TABLE IF NOT EXISTS `shares_archive_found` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-06-07 12:49:30
+-- Dump completed on 2013-06-07 18:12:31

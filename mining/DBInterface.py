@@ -39,6 +39,7 @@ class DBInterface():
         self.bitcoinrpc = bitcoinrpc
 
     def connectDB(self):
+        self.database_extend = hasattr(settings, 'DATABASE_EXTEND') and getattr(settings, 'DATABASE_EXTEND') is True
         # Choose our database driver and put it in self.dbi
         if settings.DATABASE_DRIVER == "sqlite":
             log.debug('DB_Sqlite INIT')
@@ -46,8 +47,12 @@ class DBInterface():
             return DB_Sqlite.DB_Sqlite()
         elif settings.DATABASE_DRIVER == "mysql":
             log.debug('DB_Mysql INIT')
-            import DB_Mysql
-            return DB_Mysql.DB_Mysql()
+            if self.database_extend:
+                import DB_Mysql_Extended
+                return DB_Mysql_Extended.DB_Mysql_Extended()
+            else:
+                import DB_Mysql
+                return DB_Mysql.DB_Mysql()
         elif settings.DATABASE_DRIVER == "postgresql":
             log.debug('DB_Postgresql INIT')
             import DB_Postgresql
