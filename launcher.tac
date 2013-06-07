@@ -34,14 +34,3 @@ Interfaces.set_worker_manager(WorkerManagerInterface())
 Interfaces.set_timestamper(TimestamperInterface())
 
 mining.setup(on_startup)
-
-from lib.admin_interface import AdminInterface
-
-if settings.DATABASE_EXTEND == True and settings.BASIC_STATS == True :
-    from lib.basic_stats import BasicStats
-    BasicStats(on_startup)
-
-if settings.GW_ENABLE == True :
-    from lib.getwork_proxy import GetworkProxy
-    GetworkProxy(on_startup)
-

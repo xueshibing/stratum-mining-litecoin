@@ -12,15 +12,13 @@ class DB_Mysql():
         
         required_settings = ['PASSWORD_SALT', 'DB_MYSQL_HOST', 
                              'DB_MYSQL_USER', 'DB_MYSQL_PASS', 
-                             'DB_MYSQL_DBNAME', 'ARCHIVE_DELAY']
+                             'DB_MYSQL_DBNAME']
         
         for setting_name in required_settings:
             if not hasattr(settings, setting_name):
                 raise ValueError("%s isn't set, please set in config.py" % setting_name)
         
         self.salt = getattr(settings, 'PASSWORD_SALT')
-        self.database_extend = hasattr(settings, 'DATABASE_EXTEND') and getattr(settings, 'DATABASE_EXTEND') is True
-        
         self.connect()
         
     def connect(self):
@@ -52,13 +50,6 @@ class DB_Mysql():
             
             self.dbc.executemany(query, args)
     
-    def hash_pass(self, password):
-        m = hashlib.sha1()
-        m.update(password)
-        m.update(self.salt)
-        
-        return m.hexdigest()
-
     def import_shares(self, data):
         # Data layout
         # 0: worker_name, 

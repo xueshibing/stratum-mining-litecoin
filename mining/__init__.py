@@ -40,6 +40,7 @@ def setup(on_startup):
         try:
             result = (yield bitcoin_rpc.getblocktemplate())
             if isinstance(result, dict):
+                # litecoind implements version 1 of getblocktemplate
                 if result['version'] == 1:
                     break
 

@@ -39,33 +39,9 @@ class DBInterface():
         self.bitcoinrpc = bitcoinrpc
 
     def connectDB(self):
-        self.database_extend = hasattr(settings, 'DATABASE_EXTEND') and getattr(settings, 'DATABASE_EXTEND') is True
-        # Choose our database driver and put it in self.dbi
-        if settings.DATABASE_DRIVER == "sqlite":
-            log.debug('DB_Sqlite INIT')
-            import DB_Sqlite
-            return DB_Sqlite.DB_Sqlite()
-        elif settings.DATABASE_DRIVER == "mysql":
-            log.debug('DB_Mysql INIT')
-            if self.database_extend:
-                import DB_Mysql_Extended
-                return DB_Mysql_Extended.DB_Mysql_Extended()
-            else:
-                import DB_Mysql
-                return DB_Mysql.DB_Mysql()
-        elif settings.DATABASE_DRIVER == "postgresql":
-            log.debug('DB_Postgresql INIT')
-            import DB_Postgresql
-            return DB_Postgresql.DB_Postgresql()
-        elif settings.DATABASE_DRIVER == "none":
-            log.debug('DB_None INIT')
-            import DB_None
-            return DB_None.DB_None()
-        else:
-            log.error('Invalid DATABASE_DRIVER -- using NONE')
-            log.debug('DB_None INIT')
-            import DB_None
-            return DB_None.DB_None()
+        log.debug('DB_Mysql INIT')
+        import DB_Mysql
+        return DB_Mysql.DB_Mysql()
 
     def clearusercache(self):
         log.debug("DBInterface.clearusercache called")
@@ -75,8 +51,6 @@ class DBInterface():
     def scheduleImport(self):
         # This schedule's the Import
         use_thread = True
-        if settings.DATABASE_DRIVER == "sqlite":
-            use_thread = False
         
         if use_thread:
             self.queueclock = reactor.callLater(settings.DB_LOADER_CHECKTIME , self.run_import_thread)
@@ -96,15 +70,6 @@ class DBInterface():
         
         self.do_import(self.dbi, False)
         
-        if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate:
-            self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
-            self.dbi.updateStats(settings.DB_STATS_AVG_TIME)
-            d = self.bitcoinrpc.getinfo()
-            d.addCallback(self._update_pool_info)
-            
-            if settings.ARCHIVE_SHARES:
-                self.archive_shares(self.dbi)
-                
         self.scheduleImport()
 
     def import_thread(self):
@@ -112,15 +77,6 @@ class DBInterface():
         dbi = self.connectDB()        
         self.do_import(dbi, False)
         
-        if settings.DATABASE_EXTEND and time.time() > self.nextStatsUpdate:
-            self.nextStatsUpdate = time.time() + settings.DB_STATS_AVG_TIME
-            dbi.updateStats(settings.DB_STATS_AVG_TIME)
-            d = self.bitcoinrpc.getinfo()
-            d.addCallback(self._update_pool_info)
-            
-            if settings.ARCHIVE_SHARES:
-                self.archive_shares(dbi)
-                    
         dbi.close()
 
     def _update_pool_info(self, data):
@@ -154,62 +110,6 @@ class DBInterface():
                 for k, v in enumerate(sqldata):
                     self.q.put(v)
                 break  # Allows us to sleep a little
-
-    def archive_shares(self, dbi):
-        log.debug("DBInterface.archive_shares called")
-        found_time = dbi.archive_check()
-        
-        if found_time == 0:
-            return False
-        
-        log.info("Archiving shares newer than timestamp %f " % found_time)
-        dbi.archive_found(found_time)
-        
-        if settings.ARCHIVE_MODE == 'db':
-            dbi.archive_to_db(found_time)
-            dbi.archive_cleanup(found_time)
-        elif settings.ARCHIVE_MODE == 'file':
-            shares = dbi.archive_get_shares(found_time)
-
-            filename = settings.ARCHIVE_FILE
-            
-            if settings.ARCHIVE_FILE_APPEND_TIME :
-                filename = filename + "-" + datetime.fromtimestamp(found_time).strftime("%Y-%m-%d-%H-%M-%S")
-                
-            filename = filename + ".csv"
-
-            if settings.ARCHIVE_FILE_COMPRESS == 'gzip':
-                import gzip
-                filename = filename + ".gz"
-                filehandle = gzip.open(filename, 'a')        
-            elif settings.ARCHIVE_FILE_COMPRESS == 'bzip2' and settings.ARCHIVE_FILE_APPEND_TIME :
-                import bz2
-                filename = filename + ".bz2"
-                filehandle = bz2.BZFile(filename, mode='wb', buffering=4096)
-            else:
-                filehandle = open(filename, "a")
-
-            while True:        
-                row = shares.fetchone()
-                if row == None:
-                    break
-                str1 = '","'.join([str(x) for x in row])
-                filehandle.write('"%s"\n' % str1)
-                
-            filehandle.close()
-
-            clean = False
-            
-            while not clean:
-                try:
-                    dbi.archive_cleanup(found_time)
-                    clean = True
-                except Exception as e:
-                    clean = False
-                    log.error("Archive Cleanup Failed... will retry to cleanup in 30 seconds")
-                    sleep(30)
-                
-        return True
 
     def queue_share(self, data):
         self.q.put(data)
