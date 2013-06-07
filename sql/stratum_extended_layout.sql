@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.31, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: stratum
+-- Host: localhost    Database: fresh
 -- ------------------------------------------------------
 -- Server version	5.5.31-0ubuntu0.12.04.1
 
@@ -23,10 +23,10 @@ DROP TABLE IF EXISTS `pool`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pool` (
-  `parameter` varchar(128) CHARACTER SET utf8 NOT NULL,
-  `value` varchar(512) CHARACTER SET utf8 DEFAULT NULL,
+  `parameter` varchar(128) NOT NULL,
+  `value` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`parameter`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,7 +35,7 @@ CREATE TABLE `pool` (
 
 LOCK TABLES `pool` WRITE;
 /*!40000 ALTER TABLE `pool` DISABLE KEYS */;
-INSERT INTO `pool` VALUES ('bitcoin_balance','0'),('bitcoin_blocks','0'),('bitcoin_connections','0'),('bitcoin_difficulty','0'),('bitcoin_infotime','0'),('DB Version','7'),('pool_hashrate','0'),('pool_total_found','0'),('round_best_share','0'),('round_progress','0'),('round_shares','0'),('round_start','1370341058.99371');
+INSERT INTO `pool` VALUES ('bitcoin_balance','0'),('bitcoin_blocks','0'),('bitcoin_connections','0'),('bitcoin_difficulty','0'),('bitcoin_infotime','0'),('DB Version','7'),('pool_speed','0'),('pool_total_found','0'),('round_best_share','0'),('round_progress','0'),('round_shares','0'),('round_start','1370609310.51321');
 /*!40000 ALTER TABLE `pool` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -43,110 +43,103 @@ UNLOCK TABLES;
 -- Table structure for table `pool_worker`
 --
 
+DROP TABLE IF EXISTS `pool_worker`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE IF NOT EXISTS `pool_worker` (
-  `id` int(255) unsigned NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) CHARACTER SET utf8 NOT NULL,
-  `password` char(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `hashrate` int(10) unsigned NOT NULL DEFAULT '0',
+CREATE TABLE `pool_worker` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(512) NOT NULL,
+  `password` char(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `speed` int(10) unsigned NOT NULL DEFAULT '0',
+  `difficulty` int(10) unsigned NOT NULL DEFAULT '0',
   `last_checkin` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `total_shares` int(10) unsigned NOT NULL DEFAULT '0',
   `total_rejects` int(10) unsigned NOT NULL DEFAULT '0',
   `total_found` int(10) unsigned NOT NULL DEFAULT '0',
   `alive` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `difficulty` int(10) unsigned NOT NULL DEFAULT '0',
-  `account_id` int(255) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pool_worker-username` (`username`),
+  UNIQUE KEY `pool_worker-username` (`username`(128)),
   KEY `pool_worker-alive` (`alive`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `shares`
 --
 
+DROP TABLE IF EXISTS `shares`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE IF NOT EXISTS `shares` (
-  `id` bigint(30) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `shares` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `rem_host` varchar(255) NOT NULL,
-  `worker` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `username` varchar(120) NOT NULL,
+  `rem_host` text,
+  `username` varchar(50) unsigned NOT NULL DEFAULT '0',
   `our_result` tinyint(1) DEFAULT NULL,
   `upstream_result` tinyint(1) DEFAULT NULL,
-  `reason` varchar(50),
-  `solution` varchar(256),
+  `reason` text,
+  `solution` text,
   `block_num` int(11) DEFAULT NULL,
-  `prev_block_hash` varchar(256),
-  `useragent` varchar(256),
-  `difficulty` int(11) DEFAULT NULL,
+  `prev_block_hash` text,
+  `useragent` text,
+  `difficulty` int(11) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `shares_upstreamresult` (`upstream_result`),
   KEY `shares_time_worker` (`time`,`worker`),
-  KEY `shares_worker` (`worker`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  KEY `shares_worker` (`worker`),
+  CONSTRAINT `workerid` FOREIGN KEY (`worker`) REFERENCES `pool_worker` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `shares`
---
 
 --
 -- Table structure for table `shares_archive`
 --
 
+DROP TABLE IF EXISTS `shares_archive`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE IF NOT EXISTS `shares_archive` (
-  `id` bigint(30) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `shares_archive` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `rem_host` varchar(255) NOT NULL,
-  `username` varchar(120) NOT NULL,
+  `rem_host` text,
+  `username` text,
   `our_result` tinyint(1) DEFAULT NULL,
   `upstream_result` tinyint(1) DEFAULT NULL,
-  `reason` varchar(50),
-  `solution` varchar(256),
+  `reason` text,
+  `solution` text,
   `block_num` int(11) DEFAULT NULL,
-  `prev_block_hash` varchar(256),
-  `useragent` varchar(256),
+  `prev_block_hash` text,
+  `useragent` text,
   `difficulty` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `shares_archive`
---
 
 --
 -- Table structure for table `shares_archive_found`
 --
 
+DROP TABLE IF EXISTS `shares_archive_found`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE IF NOT EXISTS `shares_archive_found` (
-  `id` bigint(30) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `shares_archive_found` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `rem_host` varchar(255) NOT NULL,
-  `username` varchar(120) NOT NULL,
+  `rem_host` text,
+  `username` text,
   `our_result` tinyint(1) DEFAULT NULL,
   `upstream_result` tinyint(1) DEFAULT NULL,
-  `reason` varchar(50),
-  `solution` varchar(256),
+  `reason` text,
+  `solution` text,
   `block_num` int(11) DEFAULT NULL,
-  `prev_block_hash` varchar(256),
-  `useragent` varchar(256),
+  `prev_block_hash` text,
+  `useragent` text,
   `difficulty` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -155,3 +148,5 @@ CREATE TABLE IF NOT EXISTS `shares_archive_found` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2013-06-07 12:49:30

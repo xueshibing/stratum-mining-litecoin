@@ -1,11 +1,8 @@
 stratum-mining-litecoin
 ==============
+A Basic implementation of litecoin mining pool using Stratum mining protocol. It will be compatible with mmfCE-ng.
 
-Basic implementation of litecoin mining pool using Stratum mining protocol.
-
-This fork includes database optimisations for MySQL and password hashing using a salt. 
-
-This fork is currently in testing. Please let me know if there is anything broken. 
+This fork is still in development. Many features may be broken. Please report any broken features or issues. 
 
 Installation Instructions can be found in the INSTALL
 

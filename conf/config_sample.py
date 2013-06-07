@@ -79,7 +79,7 @@ PASSWORD_SALT = 'some_crazy_string'
 # ******************** Database  *********************
 
 DATABASE_DRIVER = 'sqlite'	# Options: none, sqlite, postgresql or mysql
-DATABASE_EXTEND = True		# False = pushpool db layout, True = pushpool + extra columns
+DATABASE_EXTEND = False		# False = pushpool db layout, True = pushpool + extra columns
 
 # SQLite
 DB_SQLITE_FILE = 'pooldb.sqlite'
@@ -111,7 +111,8 @@ DB_USERCACHE_TIME = 600		# How long the usercache is good for before we refresh
 # ******************** Pool Settings *********************
 
 # User Auth Options
-USERS_AUTOADD = True		# Automatically add users to db when they connect.
+USERS_AUTOADD = False		# Automatically add users to db when they connect.
+USERS_AUTOADD_ACCOUNTID = 1     # Automatically add users to db when they connect.
 				# 	This basically disables User Auth for the pool.
 USERS_CHECK_PASSWORD = False	# Check the workers password? (Many pools don't)
 

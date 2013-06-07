@@ -192,6 +192,19 @@ class DB_Mysql():
         return self.dbc
 
     def import_shares(self, data):
+        # Data layout
+        # 0: worker_name, 
+        # 1: block_header, 
+        # 2: block_hash, 
+        # 3: difficulty, 
+        # 4: timestamp, 
+        # 5: is_valid, 
+        # 6: ip, 
+        # 7: self.block_height, 
+        # 8: self.prev_hash,
+        # 9: invalid_reason, 
+        # 10: share_diff
+
         log.debug("Importing Shares")
         checkin_times = {}
         total_shares = 0
@@ -227,8 +240,8 @@ class DB_Mysql():
                       useragent, difficulty) 
                     VALUES
                     (FROM_UNIXTIME(%(time)s), %(host)s, 
-                      (SELECT `id` FROM `pool_worker` WHERE `username` = %(uname)s), 
-                      %(lres)s, 0, %(reason)s, '', 
+                      %(uname)s, 
+                      %(lres)s, 0, %(reason)s, %(solution)s, 
                       %(blocknum)s, %(hash)s, '', %(difficulty)s)
                     """,
                     {
@@ -237,28 +250,38 @@ class DB_Mysql():
                         "uname": v[0],
                         "lres": v[5],
                         "reason": v[9],
+                        "solution": v[2],
                         "blocknum": v[7],
                         "hash": v[8],
                         "difficulty": v[3]
                     }
                 )
             else:
+
+                # for database compatibility we are converting our_worker to Y/N format
+                if v[5]:
+                    v[5] = 'Y'
+                else:
+                    v[5] = 'N'
+
                 self.execute(
                     """
                     INSERT INTO `shares`
-                    (time, rem_host, worker, our_result, 
-                      upstream_result, reason, solution)
+                    (time, rem_host, username, our_result, 
+                      upstream_result, reason, solution, difficulty)
                     VALUES 
                     (FROM_UNIXTIME(%(time)s), %(host)s, 
-                      (SELECT `id` FROM `pool_worker` WHERE `username` = %(uname)s), 
-                      %(lres)s, 0, %(reason)s, '')
+                      %(uname)s, 
+                      %(lres)s, 'N', %(reason)s, %(solution)s, %(difficulty)s)
                     """,
                     {
                         "time": v[4], 
                         "host": v[6], 
                         "uname": v[0], 
                         "lres": v[5], 
-                        "reason": v[9]
+                        "reason": v[9],
+                        "solution": v[2],
+                        "difficulty": v[3]
                     }
                 )
 
@@ -337,11 +360,7 @@ class DB_Mysql():
             SET `upstream_result` = %(result)s,
               `solution` = %(solution)s
             WHERE `time` = FROM_UNIXTIME(%(time)s)
-              AND `worker` = (
-                  SELECT `id` 
-                  FROM `pool_worker` 
-                  WHERE `username` = %(uname)s
-              )
+              AND `username` = %(uname)s
             LIMIT 1
             """,
             {
@@ -455,14 +474,8 @@ class DB_Mysql():
         self.execute(
             """
             UPDATE `shares`
-            SET `worker` = 0
-            WHERE `worker` = (
-                SELECT `id` 
-                FROM `pool_worker` 
-                WHERE `id` = %(id)s 
-                  OR `username` = %(uname)s
-                LIMIT 1
-            )
+            SET `username` = 0
+            WHERE `username` = %(uname)s
             """,
             {
                 "id": id_or_username if id_or_username.isdigit() else -1,
@@ -712,7 +725,7 @@ class DB_Mysql():
                     `block_num` INTEGER,
                     `prev_block_hash` TEXT,
                     `useragent` TEXT,
-                    `difficulty` INTEGER
+                    `difficulty` INTEGER DEFAULT 0
                 )
                 ENGINE=MYISAM
                 """
@@ -732,7 +745,7 @@ class DB_Mysql():
                     `username` TEXT,
                     `password` TEXT,
                     `speed` INTEGER,
-                    `difficulty` INTEGER,
+                    `difficulty` INTEGER DEFAULT 0,
                     `last_checkin` TIMESTAMP
                 )
                 ENGINE=MYISAM
@@ -887,13 +900,6 @@ class DB_Mysql():
         
     def update_version_4(self):
         log.info("running update 4")
-        
-        self.execute(
-            """
-            ALTER TABLE `pool_worker`
-            ADD `difficulty` INTEGER DEFAULT 0
-            """
-        )
         
         self.execute(
             """
