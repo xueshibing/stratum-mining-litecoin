@@ -276,10 +276,10 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
 
     def found_block(self, data):
         # for database compatibility we are converting our_worker to Y/N format
-        if data[5]:
-            data[5] = 'Y'
-        else:
-            data[5] = 'N'
+        #if data[5]:
+        #    data[5] = 'Y'
+        #else:
+        #    data[5] = 'N'
         # Note: difficulty = -1 here
         self.execute(
             """
@@ -287,7 +287,9 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             SET `upstream_result` = %(result)s,
               `solution` = %(solution)s
             WHERE `time` = FROM_UNIXTIME(%(time)s)
-              AND `username` = %(uname)s
+              AND `worker` =  (SELECT id 
+                FROM `pool_worker` 
+                WHERE `username` = %(uname)s)
             LIMIT 1
             """,
             {
