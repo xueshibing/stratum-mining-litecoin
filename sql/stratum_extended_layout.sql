@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.31, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: stratum
+-- Host: localhost    Database: orig
 -- ------------------------------------------------------
 -- Server version	5.5.31-0ubuntu0.12.04.1
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `pool` (
 
 LOCK TABLES `pool` WRITE;
 /*!40000 ALTER TABLE `pool` DISABLE KEYS */;
-INSERT INTO `pool` VALUES ('bitcoin_difficulty','0'),('bitcoin_infotime','1370628530.78521'),('DB Version','7'),('pool_speed','0'),('pool_total_found','0'),('round_best_share','11'),('round_progress','0'),('round_shares','18'),('round_start_time','1370628530.78521');
+INSERT INTO `pool` VALUES ('bitcoin_balance','0'),('bitcoin_blocks','0'),('bitcoin_connections','0'),('bitcoin_difficulty','0'),('bitcoin_infotime','0'),('DB Version','7'),('pool_speed','0'),('pool_total_found','0'),('round_best_share','0'),('round_progress','0'),('round_shares','0'),('round_start','1370800717.77349');
 /*!40000 ALTER TABLE `pool` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `pool_worker` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `pool_worker-username` (`username`(128)),
   KEY `pool_worker-alive` (`alive`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,9 +83,19 @@ CREATE TABLE IF NOT EXISTS `shares` (
   PRIMARY KEY (`id`),
   KEY `shares_upstreamresult` (`upstream_result`),
   KEY `shares_time_worker` (`time`,`worker`),
-  KEY `shares_worker` (`worker`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+  KEY `shares_worker` (`worker`),
+  CONSTRAINT `workerid` FOREIGN KEY (`worker`) REFERENCES `pool_worker` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `shares`
+--
+
+LOCK TABLES `shares` WRITE;
+/*!40000 ALTER TABLE `shares` DISABLE KEYS */;
+/*!40000 ALTER TABLE `shares` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `shares_archive`
@@ -112,6 +122,15 @@ CREATE TABLE IF NOT EXISTS `shares_archive` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `shares_archive`
+--
+
+LOCK TABLES `shares_archive` WRITE;
+/*!40000 ALTER TABLE `shares_archive` DISABLE KEYS */;
+/*!40000 ALTER TABLE `shares_archive` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `shares_archive_found`
 --
 
@@ -135,6 +154,16 @@ CREATE TABLE IF NOT EXISTS `shares_archive_found` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `shares_archive_found`
+--
+
+LOCK TABLES `shares_archive_found` WRITE;
+/*!40000 ALTER TABLE `shares_archive_found` DISABLE KEYS */;
+/*!40000 ALTER TABLE `shares_archive_found` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -143,4 +172,4 @@ CREATE TABLE IF NOT EXISTS `shares_archive_found` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-06-07 18:12:31
+-- Dump completed on 2013-06-09 17:59:11
