@@ -89,7 +89,7 @@ class MiningService(GenericService):
                 worker_name, session, extranonce1_bin, extranonce2, ntime, nonce, difficulty)
         except SubmitException as e:
             # block_header and block_hash are None when submitted data are corrupted
-            Interfaces.share_manager.on_submit_share(worker_name, None, None, difficulty,
+            Interfaces.share_manager.on_submit_share(worker_name, False, False, difficulty,
                 submit_time, False, ip, e[0], 0)    
             raise
             
