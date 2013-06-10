@@ -258,17 +258,16 @@ class DB_Mysql():
         self.dbh.commit()
     
     def clear_worker_diff(self):
-        if self.database_extend:
-            log.debug("Resetting difficulty for all workers")
-            
-            self.execute(
-                """
-                UPDATE `pool_worker`
-                SET `difficulty` = 0
-                """
-            )
-            
-            self.dbh.commit()
+        log.debug("Resetting difficulty for all workers")
+        
+        self.execute(
+            """
+            UPDATE `pool_worker`
+            SET `difficulty` = 0
+            """
+        )
+        
+        self.dbh.commit()
 
     def check_password(self, username, password):
         log.debug("Checking username/password for %s", username)
