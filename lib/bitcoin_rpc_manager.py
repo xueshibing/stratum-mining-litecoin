@@ -32,6 +32,10 @@ class BitcoinRPCManager(object):
 							settings.__dict__['LITECOIN_TRUSTED_USER_' + str(x)],
 							settings.__dict__['LITECOIN_TRUSTED_PASSWORD_' + str(x)])
 
+    def add_connection(self, host, port, user, password):
+        # TODO: Some string sanity checks
+        self.conns[len(self.conns)] = BitcoinRPC(host, port, user, password)
+
     def next_connection(self):
 	time.sleep(1)
 	if len(self.conns) <= 1:

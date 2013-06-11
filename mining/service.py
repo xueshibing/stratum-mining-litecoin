@@ -31,6 +31,17 @@ class MiningService(GenericService):
         log.info("New block notification received")
         Interfaces.template_registry.update_block()
         return True 
+
+    @admin
+    def add_litecoind(self, *args):
+        ''' Function to add a litecoind instance live '''
+        if len(args) != 4:
+            raise SubmitException("Incorrect number of parameters sent")
+
+        #(host, port, user, password) = args
+        Interfaces.template_registry.bitcoin_rpc.add_connection(args[0], args[1], args[2], args[3])
+        log.info("New litecoind connection added %s:%s" % (args[0], args[1]))
+        return True 
     
     def authorize(self, worker_name, worker_password):
         '''Let authorize worker on this connection.'''
