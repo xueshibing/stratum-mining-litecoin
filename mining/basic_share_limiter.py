@@ -78,8 +78,8 @@ class BasicShareLimiter(object):
         # Cache the litecoin difficulty so we do not have to query it on every submit
         # Update the difficulty  if it is out of date or not set
         if 'timestamp' not in self.litecoin or self.litecoin['timestamp'] < int(time.time()) - settings.DIFF_UPDATE_FREQUENCY:
-            self.litecoin['difficulty'] = (yield Interfaces.template_registry.bitcoin_rpc.getdifficulty())
             self.litecoin['timestamp'] = time.time()
+            self.litecoin['difficulty'] = (yield Interfaces.template_registry.bitcoin_rpc.getdifficulty())
             log.debug("Updated litecoin difficulty to %s" %  (self.litecoin['difficulty']))
         self.litecoin_diff = self.litecoin['difficulty']
 
