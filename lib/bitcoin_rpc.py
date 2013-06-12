@@ -70,3 +70,8 @@ class BitcoinRPC(object):
     def validateaddress(self, address):
         resp = (yield self._call('validateaddress', [address,]))
         defer.returnValue(json.loads(resp)['result'])
+
+    @defer.inlineCallbacks
+    def getdifficulty(self):
+        resp = (yield self._call('getdifficulty', []))
+        defer.returnValue(json.loads(resp)['result'])
