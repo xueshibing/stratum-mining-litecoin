@@ -3,8 +3,8 @@ from twisted.internet import defer
 
 from stratum import settings
 
-import stratum.logger
-log = stratum.logger.get_logger('coinbaser')
+import lib.logger
+log = lib.logger.get_logger('coinbaser')
 
 # TODO: Add on_* hooks in the app
     

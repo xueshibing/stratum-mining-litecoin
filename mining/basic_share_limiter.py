@@ -1,7 +1,7 @@
 from stratum import settings
 
-import stratum.logger
-log = stratum.logger.get_logger('BasicShareLimiter')
+import lib.logger
+log = lib.logger.get_logger('BasicShareLimiter')
 
 import DBInterface
 dbi = DBInterface.DBInterface()

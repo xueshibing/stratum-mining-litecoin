@@ -6,8 +6,8 @@ import signal
 
 from stratum import settings
 
-import stratum.logger
-log = stratum.logger.get_logger('DBInterface')
+import lib.logger
+log = lib.logger.get_logger('DBInterface')
 
 class DBInterface():
     def __init__(self):

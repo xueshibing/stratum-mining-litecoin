@@ -4,8 +4,8 @@ from stratum import settings
 import util
 from mining.interfaces import Interfaces
 
-import stratum.logger
-log = stratum.logger.get_logger('block_updater')
+import lib.logger
+log = lib.logger.get_logger('block_updater')
 
 class BlockUpdater(object):
     '''

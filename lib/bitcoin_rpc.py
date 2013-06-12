@@ -7,8 +7,8 @@ import base64
 from twisted.internet import defer
 from twisted.web import client
 
-import stratum.logger
-log = stratum.logger.get_logger('bitcoin_rpc')
+import lib.logger
+log = lib.logger.get_logger('bitcoin_rpc')
 
 class BitcoinRPC(object):
     

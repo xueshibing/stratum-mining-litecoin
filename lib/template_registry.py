@@ -7,8 +7,8 @@ import ltc_scrypt
 from twisted.internet import defer
 from lib.exceptions import SubmitException
 
-import stratum.logger
-log = stratum.logger.get_logger('template_registry')
+import lib.logger
+log = lib.logger.get_logger('template_registry')
 
 from mining.interfaces import Interfaces
 from extranonce_counter import ExtranonceCounter
