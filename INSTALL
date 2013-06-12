@@ -26,14 +26,21 @@ Step 4. Run the pool
 	/usr/local/bin/twistd -ny launcher.tac -l -
 
 You can now set the URL on your stratum proxy (or miner that supports stratum) to:
-http://YOURHOSTNAME:3333
+stratum+tcp://YOURHOSTNAME:3333
 
 Database Setup
 =========================
-Table Creation: Tables are auto-created if they don't exist (I will be adding a schema file later)
+Table Creation:  
+Sqlite and Posgresql have the origional fucntionalty that generalfault and wadewomersley wrote in. The Mysql Extended is the same, but I have made modification to the default layout to make it compatible with mmcFE-ng.  The Extended version is not compaible as it stands, but you can easily modify it. I am not currently maintaing any of the extended database features. Please submit a pull request if you update the extended versions. 
 
-None:
-Well, this doesn't do anything, so there is nothing to set up
+Add the sql files from the /sql directory. There are two in there:
+
+stratum_default_layout.sql
+stratum_extended_layout.sql
+
+Use the stratum_extended_layout.sql when you have DATABASE_EXTEND = True
+Use stratum_default_layout.sql when you have DATABASE_EXTEND = False
+
 
 Sqlite:
 THIS IS THE DEFAULT!
@@ -64,12 +71,4 @@ Mysql:
 3. Install the python bindings
 	easy_install mysql-python
 4. Create a database and user.
-
-Problems????
-=========================
-
-Is your firewall off?
-Is litecoin running?
-
-TODO: are there other problems?
 

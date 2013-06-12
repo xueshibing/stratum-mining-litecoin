@@ -6,6 +6,8 @@ This fork is still in development. Many features may be broken. Please report an
 
 Installation Instructions can be found in the INSTALL
 
+Please note that I am only working with DATABASE_EXTEND = False. DATABASE_EXTEND = True has a different database structure and is currently incompatible with mmcFE-ng. If you use this feature and make modifications to get it working please submitt a pull request. 
+
 JSON API
 --------
 
