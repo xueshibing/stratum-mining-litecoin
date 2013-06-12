@@ -71,7 +71,6 @@ class BasicShareLimiter(object):
         self.buffersize = self.retarget / self.target * 4
         self.litecoin = {}
         self.litecoin_diff = 100000000 # TODO: Set this to VARDIFF_MAX
-        self.update_litecoin_difficulty()
         # TODO: trim the hash of inactive workers
 
     @defer.inlineCallbacks
