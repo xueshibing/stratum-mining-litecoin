@@ -231,6 +231,9 @@ class DBInterface():
         
         if wid in self.usercache:
             return True
+        elif not settings.USERS_CHECK_PASSWORD and self.user_exists(username): 
+            self.usercache[wid] = 1
+            return True
         elif self.dbi.check_password(username, password):
             self.usercache[wid] = 1
             return True
@@ -246,6 +249,11 @@ class DBInterface():
     
     def get_user(self, id):
         return self.dbi.get_user(id)
+
+    def user_exists(self, username):
+        user = self.dbi.get_user(username)
+        print("user %s" % (user['username']))
+        return user['username'] > 0
 
     def insert_user(self, username, password):        
         return self.dbi.insert_user(username, password)
