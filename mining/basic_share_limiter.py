@@ -7,6 +7,10 @@ import DBInterface
 dbi = DBInterface.DBInterface()
 dbi.clear_worker_diff()
 
+from twisted.internet import defer
+from mining.interfaces import Interfaces
+import time
+
 ''' This is just a customized ring buffer '''
 class SpeedBuffer:
     def __init__(self, size_max):
@@ -59,13 +63,26 @@ class SpeedBufferFull:
 class BasicShareLimiter(object):
     def __init__(self):
         self.worker_stats = {}
-        self.target = settings.VDIFF_TARGET
-        self.retarget = settings.VDIFF_RETARGET
+        self.target = settings.VDIFF_TARGET_TIME
+        self.retarget = settings.VDIFF_RETARGET_TIME
         self.variance = self.target * (float(settings.VDIFF_VARIANCE_PERCENT) / float(100))
         self.tmin = self.target - self.variance
         self.tmax = self.target + self.variance
         self.buffersize = self.retarget / self.target * 4
+        self.litecoin = {}
+        self.litecoin_diff = 100000000 # TODO: Set this to VARDIFF_MAX
+        self.update_litecoin_difficulty()
         # TODO: trim the hash of inactive workers
+
+    @defer.inlineCallbacks
+    def update_litecoin_difficulty(self):
+        # Cache the litecoin difficulty so we do not have to query it on every submit
+        # Update the difficulty  if it is out of date or not set
+        if 'timestamp' not in self.litecoin or self.litecoin['timestamp'] < int(time.time()) - settings.DIFF_UPDATE_FREQUENCY:
+            self.litecoin['difficulty'] = (yield Interfaces.template_registry.bitcoin_rpc.getdifficulty())
+            self.litecoin['timestamp'] = time.time()
+            log.debug("Updated litecoin difficulty to %s" %  (self.litecoin['difficulty']))
+        self.litecoin_diff = self.litecoin['difficulty']
 
     def submit(self, connection_ref, job_id, current_difficulty, timestamp, worker_name):
         ts = int(timestamp)
@@ -96,19 +113,23 @@ class BasicShareLimiter(object):
 
         # Figure out our Delta-Diff
         ddiff = int((float(current_difficulty) * (float(self.target) / float(avg))) - current_difficulty)
-        if (avg > self.tmax and current_difficulty > settings.POOL_TARGET):
+        if (avg > self.tmax and current_difficulty > settings.VDIFF_MIN_TARGET):
             # For fractional -0.1 ddiff's just drop by 1
             if ddiff > -1:
                 ddiff = -1
             # Don't drop below POOL_TARGET
-            if (ddiff + current_difficulty) < settings.POOL_TARGET:
-                ddiff = settings.POOL_TARGET - current_difficulty
+            if (ddiff + current_difficulty) < settings.VDIFF_MIN_TARGET:
+                ddiff = settings.VDIFF_MIN_TARGET - current_difficulty
         elif avg < self.tmin:
             # For fractional 0.1 ddiff's just up by 1
             if ddiff < 1:
                 ddiff = 1
-            # Don't go above BITCOIN_DIFF
-            # TODO
+            # Don't go above LITECOIN or VDIFF_MAX_TARGET
+            self.update_litecoin_difficulty()
+            diff_max = min([settings.VDIFF_MAX_TARGET, self.litecoin_diff])
+            if (ddiff + current_difficulty) > diff_max:
+                ddiff = diff_max - current_difficulty
+            
         else:  # If we are here, then we should not be retargeting.
             return
 

@@ -141,9 +141,13 @@ POOL_TARGET = 16			# Pool-wide difficulty target int >= 1
 VARIABLE_DIFF = True		# Master variable difficulty enable
 
 # Variable diff tuning variables
-VDIFF_TARGET = 30		# Target time per share (i.e. try to get 1 share per this many seconds)
-VDIFF_RETARGET = 300		# Check to see if we should retarget this often
-VDIFF_VARIANCE_PERCENT = 50	# Allow average time to very this % from target without retarget
+#VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or Liteconin's difficulty)
+DIFF_UPDATE_FREQUENCY = 86400 # Update the litecoin difficulty once a day for the VARDIFF maximum
+VDIFF_MIN_TARGET = 15		#  Minimum Target difficulty 
+VDIFF_MAX_TARGET = 1000		# Maximum Target difficulty 
+VDIFF_TARGET_TIME = 30		# Target time per share (i.e. try to get 1 share per this many seconds)
+VDIFF_RETARGET_TIME = 120		# Check to see if we should retarget this often
+VDIFF_VARIANCE_PERCENT = 20	# Allow average time to very this % from target without retarget
 
 # ******************** Stats Settings *********************
 
@@ -200,5 +204,4 @@ ADMIN_PASSWORD_SHA256 = '9e6c0c1db1e0dfb3fa5159deb4ecd9715b3c8cd6b06bd4a3ad77e9a
 # returns a single user. POSTs are done to lists (so /users), PUTs are done to 
 # items (so /users/1)
 ADMIN_PORT = 8085 #Port for JSON admin commands, None to disable
-
 

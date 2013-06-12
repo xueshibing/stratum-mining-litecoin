@@ -121,3 +121,9 @@ class BitcoinRPCManager(object):
 		self.next_connection()
 	
 
+    def getdifficulty(self):
+	while True:
+	    try:
+		return self.conns[self.curr_conn].getdifficulty()
+	    except:
+		self.next_connection()
