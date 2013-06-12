@@ -1,5 +1,5 @@
-import stratum.logger
-log = stratum.logger.get_logger('Getwork Proxy')
+import lib.logger
+log = lib.logger.get_logger('Getwork Proxy')
 
 from stratum import settings
 from stratum.socket_transport import SocketTransportClientFactory

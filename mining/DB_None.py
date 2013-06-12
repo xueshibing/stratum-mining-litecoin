@@ -1,5 +1,5 @@
-import stratum.logger
-log = stratum.logger.get_logger('None')
+import lib.logger
+log = lib.logger.get_logger('None')
                 
 class DB_None():
     def __init__(self):

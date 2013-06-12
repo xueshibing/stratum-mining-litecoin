@@ -2,8 +2,8 @@ from stratum.pubsub import Pubsub, Subscription
 from mining.interfaces import Interfaces
 
 from stratum import settings
-import stratum.logger
-log = stratum.logger.get_logger('subscription')
+import lib.logger
+log = lib.logger.get_logger('subscription')
 
 class MiningSubscription(Subscription):
     '''This subscription object implements

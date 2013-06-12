@@ -12,12 +12,6 @@ on_startup = defer.Deferred()
 
 import stratum
 from stratum import settings
-# Create the log folder if it does not exist
-try:
-    os.makedirs(os.path.join(os.getcwd(), settings.LOGDIR))
-except OSError:
-    pass
-
 # Bootstrap Stratum framework
 application = stratum.setup(on_startup)
 

@@ -8,8 +8,8 @@ from interfaces import Interfaces
 from subscription import MiningSubscription
 from lib.exceptions import SubmitException
 
-import stratum.logger
-log = stratum.logger.get_logger('mining')
+import lib.logger
+log = lib.logger.get_logger('mining')
                 
 class MiningService(GenericService):
     '''This service provides public API for Stratum mining proxy

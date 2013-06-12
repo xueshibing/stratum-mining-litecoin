@@ -3,8 +3,8 @@ from email.mime.text import MIMEText
 
 from stratum import settings
 
-import stratum.logger
-log = stratum.logger.get_logger('Notify_Email')
+import lib.logger
+log = lib.logger.get_logger('Notify_Email')
 
 class NOTIFY_EMAIL():
 

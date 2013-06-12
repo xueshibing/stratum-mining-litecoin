@@ -16,8 +16,8 @@ from twisted.internet.protocol import Protocol
 from util import *
 
 import ltc_scrypt
-import stratum.logger
-log = stratum.logger.get_logger('halfnode')
+import lib.logger
+log = lib.logger.get_logger('halfnode')
 
 MY_VERSION = 31402
 MY_SUBVERSION = ".4"

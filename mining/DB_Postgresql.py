@@ -1,8 +1,8 @@
 import time
 import hashlib
 from stratum import settings
-import stratum.logger
-log = stratum.logger.get_logger('DB_Postgresql')
+import lib.logger
+log = lib.logger.get_logger('DB_Postgresql')
 
 import psycopg2
 from psycopg2 import extras

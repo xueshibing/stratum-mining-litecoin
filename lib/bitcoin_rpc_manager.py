@@ -10,8 +10,8 @@ from stratum import settings
 
 import time
 
-import stratum.logger
-log = stratum.logger.get_logger('bitcoin_rpc_manager')
+import lib.logger
+log = lib.logger.get_logger('bitcoin_rpc_manager')
 
 from lib.bitcoin_rpc import BitcoinRPC
 

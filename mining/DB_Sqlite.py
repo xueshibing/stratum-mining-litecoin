@@ -1,7 +1,7 @@
 import time
 from stratum import settings
-import stratum.logger
-log = stratum.logger.get_logger('DB_Sqlite')
+import lib.logger
+log = lib.logger.get_logger('DB_Sqlite')
 
 import sqlite3
                

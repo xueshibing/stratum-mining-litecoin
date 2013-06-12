@@ -7,8 +7,8 @@ from datetime import timedelta
 import json
 from stratum import settings
 
-import stratum.logger
-log = stratum.logger.get_logger('Basic Stats')
+import lib.logger
+log = lib.logger.get_logger('Basic Stats')
 
 import mining.DBInterface
 dbi = mining.DBInterface.DBInterface()

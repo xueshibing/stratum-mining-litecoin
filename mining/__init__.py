@@ -17,8 +17,8 @@ def setup(on_startup):
     from stratum import settings
         
     # Get logging online as soon as possible
-    import stratum.logger
-    log = stratum.logger.get_logger('mining')
+    import lib.logger
+    log = lib.logger.get_logger('mining')
 
     from interfaces import Interfaces
     

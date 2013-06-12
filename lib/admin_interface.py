@@ -13,8 +13,8 @@ from pprint import pprint
 
 from stratum import settings
 
-import stratum.logger
-log = stratum.logger.get_logger('Admin Interface')
+import lib.logger
+log = lib.logger.get_logger('Admin Interface')
 
 import mining.DBInterface
 import sha
