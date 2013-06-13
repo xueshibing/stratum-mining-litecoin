@@ -55,6 +55,9 @@ LOG_RETENTION = 10 # Keep 10 Logs
 # it should be slightly more, say 100-300.
 THREAD_POOL_SIZE = 300
 
+# Disable the example service
+ENABLE_EXAMPLE_SERVICE = False
+
 # ******************** TRANSPORTS *********************
 
 # Hostname or external IP to expose
