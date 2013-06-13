@@ -252,8 +252,7 @@ class DBInterface():
 
     def user_exists(self, username):
         user = self.dbi.get_user(username)
-        print("user %s" % (user['username']))
-        return user['username'] > 0
+        return user is not None and 'username' in user
 
     def insert_user(self, username, password):        
         return self.dbi.insert_user(username, password)
