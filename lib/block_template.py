@@ -9,7 +9,7 @@ from coinbasetx import CoinbaseTransaction
 
 # Remove dependency to settings, coinbase extras should be
 # provided from coinbaser
-from stratum import settings
+import settings
 
 class BlockTemplate(halfnode.CBlock):
     '''Template is used for generating new jobs for clients.

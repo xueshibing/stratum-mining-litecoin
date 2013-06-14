@@ -1,7 +1,7 @@
 import util
 from twisted.internet import defer
 
-from stratum import settings
+import settings
 
 import lib.logger
 log = lib.logger.get_logger('coinbaser')

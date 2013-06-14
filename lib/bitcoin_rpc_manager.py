@@ -6,7 +6,7 @@
 import simplejson as json
 from twisted.internet import defer
 
-from stratum import settings
+import settings
 
 import time
 

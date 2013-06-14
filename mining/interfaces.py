@@ -7,7 +7,7 @@ import time
 from twisted.internet import reactor, defer
 from lib.util import b58encode
 
-from stratum import settings
+import lib.settings as settings
 import lib.logger
 log = lib.logger.get_logger('interfaces')
 
