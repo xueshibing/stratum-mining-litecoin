@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 
-from stratum import settings
+import settings
 
 import lib.logger
 log = lib.logger.get_logger('Notify_Email')

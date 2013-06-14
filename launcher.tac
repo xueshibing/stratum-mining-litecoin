@@ -11,7 +11,7 @@ from twisted.internet import defer
 on_startup = defer.Deferred()
 
 import stratum
-from stratum import settings
+import lib.settings as settings
 # Bootstrap Stratum framework
 application = stratum.setup(on_startup)
 

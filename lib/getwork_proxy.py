@@ -1,7 +1,7 @@
 import lib.logger
 log = lib.logger.get_logger('Getwork Proxy')
 
-from stratum import settings
+import settings
 from stratum.socket_transport import SocketTransportClientFactory
             
 from twisted.internet import reactor, defer

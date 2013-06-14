@@ -11,7 +11,7 @@ import datetime
 import hashlib
 from pprint import pprint
 
-from stratum import settings
+import settings
 
 import lib.logger
 log = lib.logger.get_logger('Admin Interface')

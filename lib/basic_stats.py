@@ -5,7 +5,7 @@ from twisted.web import static,server
 import time
 from datetime import timedelta
 import json
-from stratum import settings
+import settings
 
 import lib.logger
 log = lib.logger.get_logger('Basic Stats')
