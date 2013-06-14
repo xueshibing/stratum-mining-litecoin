@@ -1,6 +1,6 @@
 import time
 import hashlib
-from stratum import settings
+import lib.settings as settings
 import lib.logger
 log = lib.logger.get_logger('DB_Mysql')
 

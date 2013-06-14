@@ -1,5 +1,5 @@
 from twisted.internet import reactor, defer
-from stratum import settings
+import settings
 
 import util
 from mining.interfaces import Interfaces

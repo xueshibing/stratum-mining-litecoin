@@ -1,7 +1,7 @@
 import binascii
 from twisted.internet import defer
 
-from stratum import settings
+import lib.settings as settings
 from stratum.services import GenericService, admin
 from stratum.pubsub import Pubsub
 from interfaces import Interfaces

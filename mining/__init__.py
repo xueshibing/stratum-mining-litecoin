@@ -14,7 +14,7 @@ def setup(on_startup):
     you should set proper reference to Interfaces class
     *before* you call setup() in the launcher script.'''
     
-    from stratum import settings
+    import lib.settings as settings
         
     # Get logging online as soon as possible
     import lib.logger

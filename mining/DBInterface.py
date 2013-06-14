@@ -4,7 +4,7 @@ from datetime import datetime
 import Queue
 import signal
 
-from stratum import settings
+import lib.settings as settings
 
 import lib.logger
 log = lib.logger.get_logger('DBInterface')
