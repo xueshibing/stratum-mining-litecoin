@@ -19,6 +19,24 @@ CREATE TABLE IF NOT EXISTS `shares` (
   KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Add the difficulty column to shares if it does not exist
+-- Taken from here
+-- http://stackoverflow.com/questions/972922/add-column-to-mysql-table-if-it-does-not-exist
+--
+SELECT count(*)
+INTO @exist
+FROM information_schema.columns 
+WHERE table_schema = database()
+and COLUMN_NAME = 'difficulty'
+AND table_name = 'shares';
+
+set @query = IF(@exist <= 0, "ALTER TABLE `shares` ADD `difficulty` int(11) NOT NULL default '0'", 
+'select \'Column Exists\' status');
+
+prepare stmt from @query;
+
+EXECUTE stmt;
 
 --
 -- Table structure for table `pool_worker`
