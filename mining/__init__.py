@@ -40,7 +40,8 @@ def setup(on_startup):
         try:
             result = (yield bitcoin_rpc.getblocktemplate())
             if isinstance(result, dict):
-                if result['version'] == 1:
+                # litecoind implements version 1 of getblocktemplate
+                if result['version'] == 1 or result['version'] == 2:
                     break
 
         except ConnectionRefusedError, e:
