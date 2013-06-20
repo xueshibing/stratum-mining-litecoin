@@ -128,8 +128,7 @@ class DB_Mysql():
         self.dbh.commit()
         
     def list_users(self):
-        cursor = self.dbh.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute(
+        self.execute(
             """
             SELECT *
             FROM `pool_worker`
@@ -138,20 +137,18 @@ class DB_Mysql():
         )
         
         while True:
-            results = cursor.fetchmany()
+            results = self.dbc.fetchmany()
             if not results:
                 break
             
             for result in results:
                 yield result
                 
-        cursor.close()
                 
     def get_user(self, id_or_username):
         log.debug("Finding user with id or username of %s", id_or_username)
-        cursor = self.dbh.cursor(MySQLdb.cursors.DictCursor)
         
-        cursor.execute(
+        self.execute(
             """
             SELECT *
             FROM `pool_worker`
@@ -164,8 +161,7 @@ class DB_Mysql():
             }
         )
         
-        user = cursor.fetchone()
-        cursor.close()
+        user = self.dbc.fetchone()
         return user
         
 
