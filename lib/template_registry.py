@@ -223,10 +223,10 @@ class TemplateRegistry(object):
         # 4. Reverse header and compare it with target of the user
         hash_bin = ltc_scrypt.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
         hash_int = util.uint256_from_str(hash_bin)
-        block_hash_hex = "%064x" % hash_int
+        scrypt_hash_hex = "%064x" % hash_int
         header_hex = binascii.hexlify(header_bin)
-
         header_hex = header_hex+"000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000"
+        
                  
         target_user = self.diff_to_target(difficulty)        
         if hash_int > target_user and \
@@ -242,10 +242,15 @@ class TemplateRegistry(object):
         # Algebra tells us the diff_to_target is the same as hash_to_diff
         share_diff = int(self.diff_to_target(hash_int))
 
+
         # 5. Compare hash with target of the network        
         if hash_int <= job.target:
             # Yay! It is block candidate! 
-            log.info("We found a block candidate! %s" % block_hash_hex)
+            log.info("We found a block candidate! %s" % scrypt_hash_hex)
+
+            # Reverse the header and get the potential block hash (for scrypt only) only do this if it is a block candidate to save cpu cycles
+            block_hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+            block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
            
             # 6. Finalize and serialize block object 
             job.finalize(merkle_root_int, extranonce1_bin, extranonce2_bin, int(ntime, 16), int(nonce, 16))
@@ -256,8 +261,8 @@ class TemplateRegistry(object):
                             
             # 7. Submit block to the network
             serialized = binascii.hexlify(job.serialize())
-            on_submit = self.bitcoin_rpc.submitblock(serialized)
-            
-            return (header_hex, block_hash_hex, share_diff, on_submit)
+            on_submit = self.bitcoin_rpc.submitblock(serialized, block_hash_hex)
+
+            return (header_hex, scrypt_hash_hex, share_diff, on_submit)
         
-        return (header_hex, block_hash_hex, share_diff, None)
+        return (header_hex, scrypt_hash_hex, share_diff, None)
