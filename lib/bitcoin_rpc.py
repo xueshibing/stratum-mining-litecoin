@@ -6,6 +6,7 @@ import simplejson as json
 import base64
 from twisted.internet import defer
 from twisted.web import client
+import time
 
 import lib.logger
 log = lib.logger.get_logger('bitcoin_rpc')
@@ -39,11 +40,12 @@ class BitcoinRPC(object):
             }))
 
     @defer.inlineCallbacks
-    def submitblock(self, block_hex):
+    def submitblock(self, block_hex, block_hash_hex):
         #resp = (yield self._call('submitblock', [block_hex,]))
         resp = (yield self._call('getblocktemplate', [{'mode': 'submit', 'data': block_hex}]))
         if json.loads(resp)['result'] == None:
-            defer.returnValue(True)
+            # make sure the block was created. 
+            defer.returnValue((yield self.blockexists(block_hash_hex)))
         else:
             defer.returnValue(False)
 
@@ -75,3 +77,13 @@ class BitcoinRPC(object):
     def getdifficulty(self):
         resp = (yield self._call('getdifficulty', []))
         defer.returnValue(json.loads(resp)['result'])
+
+    def blockexists(self, block_hash_hex):
+        resp = (yield self._call('getblock', [block_hash_hex,]))
+        if hash in json.loads(resp)['result'] and  json.loads(resp)['result']['hash'] == block_hash_hex:
+            log.debug("Block Confirmed: %s" % block_hash_hex)
+            defer.returnValue(True)
+        else:
+            log.info("Cannot find block for %s" % block_hash_hex)
+            defer.returnValue(False)
+            
