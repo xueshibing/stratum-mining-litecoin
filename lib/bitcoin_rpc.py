@@ -78,9 +78,10 @@ class BitcoinRPC(object):
         resp = (yield self._call('getdifficulty', []))
         defer.returnValue(json.loads(resp)['result'])
 
+    @defer.inlineCallbacks
     def blockexists(self, block_hash_hex):
         resp = (yield self._call('getblock', [block_hash_hex,]))
-        if hash in json.loads(resp)['result'] and  json.loads(resp)['result']['hash'] == block_hash_hex:
+        if "hash" in json.loads(resp)['result'] and  json.loads(resp)['result']['hash'] == block_hash_hex:
             log.debug("Block Confirmed: %s" % block_hash_hex)
             defer.returnValue(True)
         else:
