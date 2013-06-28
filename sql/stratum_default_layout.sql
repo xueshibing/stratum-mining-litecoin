@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `shares` (
   `reason` varchar(50) DEFAULT NULL,
   `solution` varchar(257) NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `difficulty` int(11) DEFAULT '0',
+  `difficulty` float(11) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `time` (`time`),
   KEY `upstream_result` (`upstream_result`),
@@ -31,7 +31,7 @@ WHERE table_schema = database()
 and COLUMN_NAME = 'difficulty'
 AND table_name = 'shares';
 
-set @query = IF(@exist <= 0, "ALTER TABLE `shares` ADD `difficulty` int(11) NOT NULL default '0'", 
+set @query = IF(@exist <= 0, "ALTER TABLE `shares` ADD `difficulty` float(11) NOT NULL default '0'", 
 'select \'Column Exists\' status');
 
 prepare stmt from @query;
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `pool_worker` (
   `username` char(50) DEFAULT NULL,
   `password` char(255) DEFAULT NULL,
   `hashrate` int(11) DEFAULT NULL,
-  `difficulty` int(11) DEFAULT '0',
+  `difficulty` float(11) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   KEY `account_id` (`account_id`)
@@ -66,7 +66,7 @@ WHERE table_schema = database()
 and COLUMN_NAME = 'difficulty'
 AND table_name = 'pool_worker';
 
-set @query = IF(@exist <= 0, "ALTER TABLE `shares` ADD `difficulty` int(11) NOT NULL default '0'", 
+set @query = IF(@exist <= 0, "ALTER TABLE `shares` ADD `difficulty` float(11) NOT NULL default '0'", 
 'select \'Column Exists\' status');
 
 prepare stmt1 from @query;

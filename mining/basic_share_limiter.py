@@ -111,7 +111,7 @@ class BasicShareLimiter(object):
             avg = 1
 
         # Figure out our Delta-Diff
-        ddiff = int((float(current_difficulty) * (float(self.target) / float(avg))) - current_difficulty)
+        ddiff = float((float(current_difficulty) * (float(self.target) / float(avg))) - current_difficulty)
         if (avg > self.tmax and current_difficulty > settings.VDIFF_MIN_TARGET):
             # For fractional -0.1 ddiff's just drop by 1
             if ddiff > -1:

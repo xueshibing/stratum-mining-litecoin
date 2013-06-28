@@ -309,7 +309,7 @@ class DB_Mysql():
                 "total_rejects": int(data[4]),
                 "total_found": int(data[5]),
                 "alive": True if data[6] is 1 else False,
-                "difficulty": int(data[7])
+                "difficulty": float(data[7])
             }
             
         return ret
