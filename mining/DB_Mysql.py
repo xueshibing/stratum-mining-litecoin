@@ -80,11 +80,11 @@ class DB_Mysql():
                 """
                 INSERT INTO `shares`
                 (time, rem_host, username, our_result, 
-                  upstream_result, reason, solution, difficulty)
+                  upstream_result, reason, solution)
                 VALUES 
                 (FROM_UNIXTIME(%(time)s), %(host)s, 
                   %(uname)s, 
-                  %(lres)s, 'N', %(reason)s, %(solution)s, %(difficulty)s)
+                  %(lres)s, 'N', %(reason)s, %(solution)s)
                 """,
                 {
                     "time": v[4], 
@@ -92,8 +92,7 @@ class DB_Mysql():
                     "uname": v[0], 
                     "lres": v[5], 
                     "reason": v[9],
-                    "solution": v[2],
-                    "difficulty": v[3]
+                    "solution": v[2]
                 }
             )
 
@@ -236,35 +235,6 @@ class DB_Mysql():
         
         self.dbh.commit()
 
-    def update_worker_diff(self, username, diff):
-        log.debug("Setting difficulty for %s to %s", username, diff)
-        
-        self.execute(
-            """
-            UPDATE `pool_worker`
-            SET `difficulty` = %(diff)s
-            WHERE `username` = %(uname)s
-            """,
-            {
-                "uname": username, 
-                "diff": diff
-            }
-        )
-        
-        self.dbh.commit()
-    
-    def clear_worker_diff(self):
-        log.debug("Resetting difficulty for all workers")
-        
-        self.execute(
-            """
-            UPDATE `pool_worker`
-            SET `difficulty` = 0
-            """
-        )
-        
-        self.dbh.commit()
-
     def check_password(self, username, password):
         log.debug("Checking username/password for %s", username)
         
@@ -292,7 +262,7 @@ class DB_Mysql():
         self.execute(
             """
             SELECT `username`, `speed`, `last_checkin`, `total_shares`,
-              `total_rejects`, `total_found`, `alive`, `difficulty`
+              `total_rejects`, `total_found`, `alive`
             FROM `pool_worker`
             WHERE `id` > 0
             """
@@ -309,7 +279,6 @@ class DB_Mysql():
                 "total_rejects": int(data[4]),
                 "total_found": int(data[5]),
                 "alive": True if data[6] is 1 else False,
-                "difficulty": float(data[7])
             }
             
         return ret

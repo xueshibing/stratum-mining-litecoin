@@ -39,9 +39,14 @@ class DBInterface():
         self.bitcoinrpc = bitcoinrpc
 
     def connectDB(self):
-        log.debug('DB_Mysql INIT')
-        import DB_Mysql
-        return DB_Mysql.DB_Mysql()
+        if settings.VARIABLE_DIFF:
+            log.debug("DB_Mysql_Vardiff INIT")
+            import DB_Mysql_Vardiff
+            return DB_Mysql_Vardiff.DB_Mysql_Vardiff()
+        else:  
+            log.debug('DB_Mysql INIT')
+            import DB_Mysql
+            return DB_Mysql.DB_Mysql()
 
     def clearusercache(self):
         log.debug("DBInterface.clearusercache called")
