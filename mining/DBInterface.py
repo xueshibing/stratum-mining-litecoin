@@ -132,7 +132,9 @@ class DBInterface():
             log.info("Rejected worker for blank username")
             return False
         
-        wid = username + ":-:" + password
+        wid = str(username) + ":-:" + str(password)
+
+        print "settings.USERS_CHECK_PASSWORD %s   self.user_exists %s   username %s"  % (settings.USERS_CHECK_PASSWORD, self.user_exists(username), username)
         
         if wid in self.usercache:
             return True
@@ -157,7 +159,7 @@ class DBInterface():
 
     def user_exists(self, username):
         user = self.dbi.get_user(username)
-        return user is not None and 'username' in user
+        return user is not None and username in user
 
     def insert_user(self, username, password):        
         return self.dbi.insert_user(username, password)
