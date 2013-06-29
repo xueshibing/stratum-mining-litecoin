@@ -41,8 +41,8 @@ class BitcoinRPC(object):
 
     @defer.inlineCallbacks
     def submitblock(self, block_hex, block_hash_hex):
-        #resp = (yield self._call('submitblock', [block_hex,]))
-        resp = (yield self._call('getblocktemplate', [{'mode': 'submit', 'data': block_hex}]))
+        resp = (yield self._call('submitblock', [block_hex,]))
+        #resp = (yield self._call('getblocktemplate', [{'mode': 'submit', 'data': block_hex}]))
         if json.loads(resp)['result'] == None:
             # make sure the block was created. 
             defer.returnValue((yield self.blockexists(block_hash_hex)))
