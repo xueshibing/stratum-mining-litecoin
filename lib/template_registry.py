@@ -248,10 +248,6 @@ class TemplateRegistry(object):
             # Yay! It is block candidate! 
             log.info("We found a block candidate! %s" % scrypt_hash_hex)
 
-            # Reverse the header and get the potential block hash (for scrypt only) only do this if it is a block candidate to save cpu cycles
-            block_hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
-            block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
-           
             # 6. Finalize and serialize block object 
             job.finalize(merkle_root_int, extranonce1_bin, extranonce2_bin, int(ntime, 16), int(nonce, 16))
             
@@ -261,7 +257,7 @@ class TemplateRegistry(object):
                             
             # 7. Submit block to the network
             serialized = binascii.hexlify(job.serialize())
-            on_submit = self.bitcoin_rpc.submitblock(serialized, block_hash_hex)
+            on_submit = self.bitcoin_rpc.submitblock(serialized, scrypt_hash_hex)
 
             return (header_hex, scrypt_hash_hex, share_diff, on_submit)
         
