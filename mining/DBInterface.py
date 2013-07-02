@@ -134,8 +134,6 @@ class DBInterface():
         
         wid = str(username) + ":-:" + str(password)
 
-        print "settings.USERS_CHECK_PASSWORD %s   self.user_exists %s   username %s"  % (settings.USERS_CHECK_PASSWORD, self.user_exists(username), username)
-        
         if wid in self.usercache:
             return True
         elif not settings.USERS_CHECK_PASSWORD and self.user_exists(username): 
