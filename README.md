@@ -37,6 +37,13 @@ Other coins have been known to work with this implementation. I have tested with
 * Feathercoin
 * Digitalcoin
 * BBQcoin
+* Florincoin
+* Megacoin
+* Hypercoin
+* Luckycoin
+* Alphacoin
+* Argentum
+* Emeraldcoin
 
 #Installation
 

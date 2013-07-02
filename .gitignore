@@ -9,3 +9,5 @@ twistd.pid
 .pydevproject
 *.swp
 *.log
+*.bak
+log/
