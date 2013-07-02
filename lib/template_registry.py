@@ -262,6 +262,8 @@ class TemplateRegistry(object):
             # 7. Submit block to the network
             serialized = binascii.hexlify(job.serialize())
             on_submit = self.bitcoin_rpc.submitblock(serialized, block_hash_hex)
+            if on_submit:
+                self.update_block()
 
             return (header_hex, scrypt_hash_hex, share_diff, on_submit)
         
