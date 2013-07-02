@@ -1,19 +1,19 @@
-TODO File (in no particular order):
+# TODO File (in no particular order):
 
-SQL Connection pooling: sqlalchemy
+## Long Term Goals
+* Pooled/redundant solution
+* Coinbase payouts
+* Real time change options
 
-Add a "script" to add,list,disable users
+## Optimizations
+* SQL Connection pooling: sqlalchemy
+* Change caching to memcache
 
-Variable difficulty should not be able to go higher than current difficulty
+## Feature Requests
+* PoS Coins
+* YaCoin
+* Fix VARDIFF so that it has a tunable variance. (default to 1, but allow all float)
 
-Add difficulty to database on submit share.
-
-Test NON-Local Coinbase with testnet in a box
-
-verify settings
-
-send e-mail on dead miner
-
-send e-mail on dead bitcoind
-
+## Branch Management
+* Merge PoS into stratum-lite after testing. Make it an feature switch.
 
