@@ -66,7 +66,7 @@ WHERE table_schema = database()
 and COLUMN_NAME = 'difficulty'
 AND table_name = 'pool_worker';
 
-set @query = IF(@exist <= 0, "ALTER TABLE `shares` ADD `difficulty` float(11) NOT NULL default '0'", 
+set @query = IF(@exist <= 0, "ALTER TABLE `pool_worker` ADD `difficulty` float(11) NOT NULL default '0'", 
 'select \'Column Exists\' status');
 
 prepare stmt1 from @query;
