@@ -1,3 +1,9 @@
 [submodule "externals/stratum-mining-proxy"]
 	path = externals/stratum-mining-proxy
 	url = https://github.com/generalfault/stratum-mining-proxy.git
+[submodule "litecoin_scrypt"]
+	path = litecoin_scrypt
+	url = https://github.com/Tydus/litecoin_scrypt.git
+[submodule "stratum"]
+	path = stratum
+	url = https://github.com/slush0/stratum.git
