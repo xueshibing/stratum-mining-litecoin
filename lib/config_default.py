@@ -171,6 +171,7 @@ VARIABLE_DIFF = False        # Master variable difficulty enable
 
 # Variable diff tuning variables
 #VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or Liteconin's difficulty)
+USE_LITECOIN_DIFF = False   # Set the maximum difficulty to the litecoin difficulty.
 DIFF_UPDATE_FREQUENCY = 86400 # Update the litecoin difficulty once a day for the VARDIFF maximum
 VDIFF_MIN_TARGET = 15       #  Minimum Target difficulty
 VDIFF_MAX_TARGET = 1000     # Maximum Target difficulty
