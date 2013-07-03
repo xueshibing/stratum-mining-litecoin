@@ -179,3 +179,9 @@ VDIFF_TARGET_TIME = 30      # Target time per share (i.e. try to get 1 share per
 VDIFF_RETARGET_TIME = 120       # Check to see if we should retarget this often
 VDIFF_VARIANCE_PERCENT = 20 # Allow average time to very this % from target without retarget
 
+#### Advanced Option #####
+# For backwards compatibility, we send the scrypt hash to the solutions column in the shares table
+# For block confirmation, we have an option to send the block hash in
+# Please make sure your front end is compatible with the block hash in the solutions table.
+SOULTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the scrypt hash in the shares table
+

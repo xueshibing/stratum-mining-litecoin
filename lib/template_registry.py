@@ -12,6 +12,8 @@ log = lib.logger.get_logger('template_registry')
 
 from mining.interfaces import Interfaces
 from extranonce_counter import ExtranonceCounter
+import lib.settings as settings
+
 
 class JobIdGenerator(object):
     '''Generate pseudo-unique job_id. It does not need to be absolutely unique,
@@ -248,7 +250,7 @@ class TemplateRegistry(object):
             # Yay! It is block candidate! 
             log.info("We found a block candidate! %s" % scrypt_hash_hex)
 
-            # Reverse the header and get the potential block hash (for scrypt only) only do this if it is a block candidate to save cpu cycles
+            # Reverse the header and get the potential block hash (for scrypt only) 
             block_hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
             block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
            
@@ -265,6 +267,15 @@ class TemplateRegistry(object):
             if on_submit:
                 self.update_block()
 
-            return (header_hex, scrypt_hash_hex, share_diff, on_submit)
+            if settings.SOULTION_BLOCK_HASH:
+                return (header_hex, block_hash_hex, share_diff, on_submit)
+            else:
+                return (header_hex, scrypt_hash_hex, share_diff, on_submit)
         
-        return (header_hex, scrypt_hash_hex, share_diff, None)
+        if settings.SOULTION_BLOCK_HASH:
+        # Reverse the header and get the potential block hash (for scrypt only) only do this if we want to send in the block hash to the shares table
+            block_hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+            block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
+            return (header_hex, block_hash_hex, share_diff, None)
+        else:
+            return (header_hex, block_hash_hex, share_diff, None)
