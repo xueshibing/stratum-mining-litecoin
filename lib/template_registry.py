@@ -278,4 +278,4 @@ class TemplateRegistry(object):
             block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
             return (header_hex, block_hash_hex, share_diff, None)
         else:
-            return (header_hex, block_hash_hex, share_diff, None)
+            return (header_hex, scrypt_hash_hex, share_diff, None)
