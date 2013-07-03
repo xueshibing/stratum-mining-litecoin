@@ -43,6 +43,9 @@ def setup(on_startup):
                 # litecoind implements version 1 of getblocktemplate
                 if result['version'] >= 1:
                     break
+                else:
+                    log.error("Block Version mismatch: %s" % result['version'])
+
 
         except ConnectionRefusedError, e:
             log.error("Connection refused while trying to connect to litecoin (are your LITECOIN_TRUSTED_* settings correct?)")
