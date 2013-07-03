@@ -11,3 +11,4 @@ twistd.pid
 *.log
 *.bak
 log/
+*.[0-9]
