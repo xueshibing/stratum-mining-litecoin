@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 import Queue
 import signal
+import Cache
 
 import lib.settings as settings
 
@@ -19,8 +20,7 @@ class DBInterface():
         self.q = Queue.Queue()
         self.queueclock = None
 
-        self.usercache = {}
-        self.clearusercache()
+        self.cache = Cache.Cache()
 
         self.nextStatsUpdate = 0
 
@@ -47,11 +47,6 @@ class DBInterface():
             log.debug('DB_Mysql INIT')
             import DB_Mysql
             return DB_Mysql.DB_Mysql()
-
-    def clearusercache(self):
-        log.debug("DBInterface.clearusercache called")
-        self.usercache = {}
-        self.usercacheclock = reactor.callLater(settings.DB_USERCACHE_TIME , self.clearusercache)
 
     def scheduleImport(self):
         # This schedule's the Import
@@ -132,19 +127,16 @@ class DBInterface():
             log.info("Rejected worker for blank username")
             return False
         
-        wid = str(username) + ":-:" + str(password)
-
-        if wid in self.usercache:
+        if not settings.USERS_CHECK_PASSWORD and self.user_exists(username): 
             return True
-        elif not settings.USERS_CHECK_PASSWORD and self.user_exists(username): 
-            self.usercache[wid] = 1
+        elif self.cache.get(username) == password:
             return True
         elif self.dbi.check_password(username, password):
-            self.usercache[wid] = 1
+            self.cache.set(username, password)
             return True
         elif settings.USERS_AUTOADD == True:
             self.insert_user(username, password)
-            self.usercache[wid] = 1
+            self.cache.set(username, password)
             return True
         
         return False
@@ -156,6 +148,8 @@ class DBInterface():
         return self.dbi.get_user(id)
 
     def user_exists(self, username):
+        if self.cache.get(username) is not None:
+            return True
         user = self.dbi.get_user(username)
         return user is not None and username in user
 
@@ -163,11 +157,12 @@ class DBInterface():
         return self.dbi.insert_user(username, password)
 
     def delete_user(self, username):
-        self.usercache = {}
+        self.mc.delete(username)
         return self.dbi.delete_user(username)
         
     def update_user(self, username, password):
-        self.usercache = {}
+        self.mc.delete(username)
+        self.mc.set(username, password)
         return self.dbi.update_user(username, password)
 
     def update_worker_diff(self, username, diff):

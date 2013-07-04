@@ -144,3 +144,17 @@ VDIFF_VARIANCE_PERCENT = 20	# Allow average time to very this % from target with
 # Please make sure your front end is compatible with the block hash in the solutions table.
 SOULTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the scrypt hash in the shares table
 
+# ******************** Admin settings *********************
+
+# Use scripts/generateAdminHash.sh <password> to generate the hash
+# for calculating SHA256 of your preferred password
+ADMIN_PASSWORD_SHA256 = 'password hash' # SHA256 of the password
+
+
+#### Memcache ####
+# Memcahce is a requirement. Enter the settings below
+MEMCACHE_HOST = "localhost" # hostname or IP that runs memcached
+MEMCACHE_PORT = 11211 # Port
+MEMCACHE_TIMEOUT = 900 # Key timeout
+MEMCACHE_PREFIX = "stratum_" # Prefix for keys
+
