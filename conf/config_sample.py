@@ -158,3 +158,9 @@ MEMCACHE_PORT = 11211 # Port
 MEMCACHE_TIMEOUT = 900 # Key timeout
 MEMCACHE_PREFIX = "stratum_" # Prefix for keys
 
+# ******************** Admin settings *********************
+
+# Use scripts/generateAdminHash.sh <password> to generate the hash
+# for calculating SHA256 of your preferred password
+ADMIN_PASSWORD_SHA256 = 'passwordhash' # SHA256 of the password
+
