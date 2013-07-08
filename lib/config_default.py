@@ -171,10 +171,17 @@ VARIABLE_DIFF = False        # Master variable difficulty enable
 
 # Variable diff tuning variables
 #VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or Liteconin's difficulty)
+USE_LITECOIN_DIFF = False   # Set the maximum difficulty to the litecoin difficulty.
 DIFF_UPDATE_FREQUENCY = 86400 # Update the litecoin difficulty once a day for the VARDIFF maximum
 VDIFF_MIN_TARGET = 15       #  Minimum Target difficulty
 VDIFF_MAX_TARGET = 1000     # Maximum Target difficulty
 VDIFF_TARGET_TIME = 30      # Target time per share (i.e. try to get 1 share per this many seconds)
 VDIFF_RETARGET_TIME = 120       # Check to see if we should retarget this often
 VDIFF_VARIANCE_PERCENT = 20 # Allow average time to very this % from target without retarget
+
+#### Advanced Option #####
+# For backwards compatibility, we send the scrypt hash to the solutions column in the shares table
+# For block confirmation, we have an option to send the block hash in
+# Please make sure your front end is compatible with the block hash in the solutions table.
+SOULTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the scrypt hash in the shares table
 
