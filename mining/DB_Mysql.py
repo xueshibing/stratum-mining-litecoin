@@ -110,10 +110,10 @@ class DB_Mysql():
         self.execute(
             """
             UPDATE `shares`
-            SET `upstream_result` = %(result)s,
-              `solution` = %(solution)s
+            SET `upstream_result` = %(result)s
             WHERE `time` = FROM_UNIXTIME(%(time)s)
               AND `username` = %(uname)s
+              AND `solution` = %(solution)s
             LIMIT 1
             """,
             {
