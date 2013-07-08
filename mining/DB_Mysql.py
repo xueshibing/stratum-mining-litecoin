@@ -111,16 +111,12 @@ class DB_Mysql():
             """
             UPDATE `shares`
             SET `upstream_result` = %(result)s
-            WHERE `time` = FROM_UNIXTIME(%(time)s)
-              AND `username` = %(uname)s
-              AND `solution` = %(solution)s
+            WHERE `solution` = %(solution)s
             LIMIT 1
             """,
             {
                 "result": data[5], 
-                "solution": data[2], 
-                "time": data[4], 
-                "uname": data[0]
+                "solution": data[2]
             }
         )
         
