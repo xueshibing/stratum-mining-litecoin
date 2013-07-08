@@ -137,3 +137,11 @@ VDIFF_MAX_TARGET = 1000		# Maximum Target difficulty
 VDIFF_TARGET_TIME = 30		# Target time per share (i.e. try to get 1 share per this many seconds)
 VDIFF_RETARGET_TIME = 120		# Check to see if we should retarget this often
 VDIFF_VARIANCE_PERCENT = 20	# Allow average time to very this % from target without retarget
+
+# ******************** Admin settings *********************
+
+# Use scripts/generateAdminHash.sh <password> to generate the hash
+# for calculating SHA256 of your preferred password
+ADMIN_PASSWORD_SHA256 = 'password hash' # SHA256 of the password
+
+
