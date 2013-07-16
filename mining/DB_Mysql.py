@@ -150,7 +150,7 @@ class DB_Mysql():
                 VALUES 
                 (FROM_UNIXTIME(%(time)s), %(host)s, 
                   %(uname)s, 
-                  %(lres)s, '%(result)s', %(reason)s, %(solution)s)
+                  %(lres)s, %(result)s, %(reason)s, %(solution)s)
                 """,
                 {
                     "time": v[4], 
