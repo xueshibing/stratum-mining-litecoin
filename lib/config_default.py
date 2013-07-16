@@ -27,7 +27,7 @@ LOG_RETENTION = 10 # Keep 10 Logs
 # How many threads use for synchronous methods (services).
 # 30 is enough for small installation, for real usage
 # it should be slightly more, say 100-300.
-THREAD_POOL_SIZE = 100
+THREAD_POOL_SIZE = 300
 
 # RPC call throws TimeoutServiceException once total time since request has been
 # placed (time to delivery to client + time for processing on the client)
@@ -184,4 +184,18 @@ VDIFF_VARIANCE_PERCENT = 20 # Allow average time to very this % from target with
 # For block confirmation, we have an option to send the block hash in
 # Please make sure your front end is compatible with the block hash in the solutions table.
 SOULTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the scrypt hash in the shares table
+
+# ******************** Adv. DB Settings *********************
+#  Don't change these unless you know what you are doing
+
+DB_LOADER_CHECKTIME = 15    # How often we check to see if we should run the loader
+DB_LOADER_REC_MIN = 0       # Min Records before the bulk loader fires
+DB_LOADER_REC_MAX = 50      # Max Records the bulk loader will commit at a time
+
+DB_LOADER_FORCE_TIME = 300      # How often the cache should be flushed into the DB regardless of size.
+
+DB_STATS_AVG_TIME = 300     # When using the DATABASE_EXTEND option, average speed over X sec
+                #   Note: this is also how often it updates
+DB_USERCACHE_TIME = 600     # How long the usercache is good for before we refresh
+
 
