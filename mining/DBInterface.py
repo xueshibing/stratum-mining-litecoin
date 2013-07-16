@@ -97,7 +97,7 @@ class DBInterface():
             forcesize = self.q.qsize()
 
         # Only run if we have data
-        while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time or forcesize > 0:
+        while force == True or (self.q.qsize() > settings.DB_LOADER_REC_MIN and self.q.qsize() != 0) or time.time() >= self.next_force_import_time or forcesize > 0:
             self.next_force_import_time = time.time() + settings.DB_LOADER_FORCE_TIME
             
             force = False
