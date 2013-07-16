@@ -32,8 +32,8 @@ This should pull new changes for *stratum* and *litecoin_scrypt*
 
 4. Install *Litecoin_scrypt* from git
 
-	git pull https://github.com/slush0/stratum.git
-    sudo python stratum/setup.py install
+	git pull  https://github.com/Tydus/litecoin_scrypt.git
+    sudo python litecoin_scrypt/setup.py install
 
 5. Configuration of stratum-mining-litecoin
 First copy the sample configuration.
@@ -55,3 +55,12 @@ stratum-mining-litecoin requires MySQL. First make sure the database has been cr
 You can now set the URL on your stratum miner:
 
     stratum+tcp://YOURHOSTNAME:3333
+
+8. Additional Steps
+Increase the ulimit:
+
+For the session
+    ulimit -n 10240
+
+Persitantly 
+    sysctl -w fs.file-max=10240
