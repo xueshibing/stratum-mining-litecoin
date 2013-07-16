@@ -189,7 +189,7 @@ SOULTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the
 #  Don't change these unless you know what you are doing
 
 DB_LOADER_CHECKTIME = 15    # How often we check to see if we should run the loader
-DB_LOADER_REC_MIN = 0       # Min Records before the bulk loader fires
+DB_LOADER_REC_MIN = 1       # Min Records before the bulk loader fires
 DB_LOADER_REC_MAX = 50      # Max Records the bulk loader will commit at a time
 
 DB_LOADER_FORCE_TIME = 300      # How often the cache should be flushed into the DB regardless of size.
