@@ -132,7 +132,10 @@ class DBInterface():
             log.info("Rejected worker for blank username")
             return False
         
-        wid = str(username) + ":-:" + str(password)
+        # Force username and password to be strings
+        username = str(username)
+        password = str(password)
+        wid = username + ":-:" + password
 
         if wid in self.usercache:
             return True
@@ -147,6 +150,7 @@ class DBInterface():
             self.usercache[wid] = 1
             return True
         
+        log.info("Authentication for %s failed" % username)
         return False
     
     def list_users(self):
@@ -157,7 +161,7 @@ class DBInterface():
 
     def user_exists(self, username):
         user = self.dbi.get_user(username)
-        return user is not None and username in user
+        return user is not None 
 
     def insert_user(self, username, password):        
         return self.dbi.insert_user(username, password)
