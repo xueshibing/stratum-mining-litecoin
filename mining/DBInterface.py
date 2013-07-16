@@ -91,8 +91,13 @@ class DBInterface():
     def do_import(self, dbi, force):
         log.debug("DBInterface.do_import called. force: %s, queue size: %s", 'yes' if force == True else 'no', self.q.qsize())
         
+        # Flush the whole queue on force
+        forcesize = 0
+        if force:
+            forcesize = self.q.qsize()
+
         # Only run if we have data
-        while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time:
+        while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time or forcesize > 0:
             self.next_force_import_time = time.time() + settings.DB_LOADER_FORCE_TIME
             
             force = False
@@ -105,6 +110,7 @@ class DBInterface():
                 data = self.q.get()
                 sqldata.append(data)
                 self.q.task_done()
+                forcesize -= 1
                 
             # try to do the import, if we fail, log the error and put the data back in the queue
             try:
