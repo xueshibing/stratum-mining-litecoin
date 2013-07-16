@@ -29,6 +29,7 @@ class DB_Mysql():
             getattr(settings, 'DB_MYSQL_DBNAME')
         )
         self.dbc = self.dbh.cursor()
+        self.dbh.autocommit(True)
             
     def execute(self, query, args=None):
         try:
