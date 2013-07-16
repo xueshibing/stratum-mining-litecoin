@@ -39,7 +39,7 @@ DEBUG = False
 LOGDIR = 'log/'
 
 # Main application log file.
-LOGFILE = None		# eg. 'stratum.log'
+LOGFILE = "stratum.log"		# eg. 'stratum.log'
 
 # Possible values: DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOGLEVEL = 'INFO'
@@ -90,7 +90,7 @@ DB_MYSQL_PASS = '**empty**'
 #  Don't change these unless you know what you are doing
 
 DB_LOADER_CHECKTIME = 15	# How often we check to see if we should run the loader
-DB_LOADER_REC_MIN = 10		# Min Records before the bulk loader fires
+DB_LOADER_REC_MIN = 0		# Min Records before the bulk loader fires
 DB_LOADER_REC_MAX = 50		# Max Records the bulk loader will commit at a time
 
 DB_LOADER_FORCE_TIME = 300      # How often the cache should be flushed into the DB regardless of size.
@@ -127,7 +127,7 @@ INSTANCE_ID = 31		# Used for extranonce and needs to be 0-31
 POOL_TARGET = 16			# Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
-VARIABLE_DIFF = True		# Master variable difficulty enable
+VARIABLE_DIFF = False		# Master variable difficulty enable
 
 # Variable diff tuning variables
 #VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or Liteconin's difficulty)
