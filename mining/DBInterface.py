@@ -91,8 +91,13 @@ class DBInterface():
     def do_import(self, dbi, force):
         log.debug("DBInterface.do_import called. force: %s, queue size: %s", 'yes' if force == True else 'no', self.q.qsize())
         
+        # Flush the whole queue on force
+        forcesize = 0
+        if force == True:
+            forcesize = self.q.qsize()
+
         # Only run if we have data
-        while force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time:
+        while self.q.empty() == False and (force == True or self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time or forcesize > 0):
             self.next_force_import_time = time.time() + settings.DB_LOADER_FORCE_TIME
             
             force = False
@@ -105,6 +110,8 @@ class DBInterface():
                 data = self.q.get()
                 sqldata.append(data)
                 self.q.task_done()
+
+            forcesize -= datacnt
                 
             # try to do the import, if we fail, log the error and put the data back in the queue
             try:
@@ -132,7 +139,10 @@ class DBInterface():
             log.info("Rejected worker for blank username")
             return False
         
-        wid = str(username) + ":-:" + str(password)
+        # Force username and password to be strings
+        username = str(username)
+        password = str(password)
+        wid = username + ":-:" + password
 
         if wid in self.usercache:
             return True
@@ -147,6 +157,7 @@ class DBInterface():
             self.usercache[wid] = 1
             return True
         
+        log.info("Authentication for %s failed" % username)
         return False
     
     def list_users(self):
@@ -157,7 +168,7 @@ class DBInterface():
 
     def user_exists(self, username):
         user = self.dbi.get_user(username)
-        return user is not None and username in user
+        return user is not None 
 
     def insert_user(self, username, password):        
         return self.dbi.insert_user(username, password)
