@@ -7,6 +7,14 @@ The goal is to make a reliable stratum mining server for scrypt based coins. Ove
 
 **NOTE:** This fork is still in development. Many features may be broken. Please report any broken features or issues.
 
+#Donors
+A special thanks to everyone that has donated to this project. 
+
+* [litepool] (http://litepool.eu) @ freenode
+* john__ @ freenode
+
+Donations are welcome: LdaQyrh8PaLTuBxtgGo97Pj49CScqMTxvX
+
 #Features
 
 * Stratum Mining Pool 
