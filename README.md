@@ -12,6 +12,7 @@ A special thanks to everyone that has donated to this project.
 
 * [litepool] (http://litepool.eu) @ freenode
 * john__ @ freenode
+* [neamiss] (http://scryptmining.com) @ freenode
 
 Litecoin Donations are welcome: LdaQyrh8PaLTuBxtgGo97Pj49CScqMTxvX
 
