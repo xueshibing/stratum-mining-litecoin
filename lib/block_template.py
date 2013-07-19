@@ -112,7 +112,7 @@ class BlockTemplate(halfnode.CBlock):
         if ntime < self.curtime:
             return False
         
-        if ntime > (self.timestamper.time() + 1000):
+        if ntime > (self.timestamper.time() + 7200):
             # Be strict on ntime into the near future
             # may be unnecessary
             return False
