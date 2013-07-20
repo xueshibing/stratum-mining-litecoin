@@ -87,7 +87,7 @@ class BasicShareLimiter(object):
         ts = int(timestamp)
 
         # Init the stats for this worker if it isn't set.        
-        if worker_name not in self.worker_stats :
+        if worker_name not in self.worker_stats or self.worker_stats[worker_name]['last_ts'] < ts - settings.DB_USERCACHE_TIME :
             self.worker_stats[worker_name] = {'last_rtc': (ts - self.retarget / 2), 'last_ts': ts, 'buffer': SpeedBuffer(self.buffersize) }
             dbi.update_worker_diff(worker_name, settings.POOL_TARGET)
             return
@@ -138,7 +138,7 @@ class BasicShareLimiter(object):
 
         # At this point we are retargeting this worker
         new_diff = current_difficulty + ddiff
-        log.info("Retarget for %s %i old: %i new: %i" % (worker_name, ddiff, current_difficulty, new_diff))
+        log.info("Retarget for %s %s old: %s new: %s" % (worker_name, ddiff, current_difficulty, new_diff))
 
         self.worker_stats[worker_name]['buffer'].clear()
         session = connection_ref().get_session()
