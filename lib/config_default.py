@@ -183,7 +183,7 @@ VDIFF_VARIANCE_PERCENT = 20 # Allow average time to very this % from target with
 # For backwards compatibility, we send the scrypt hash to the solutions column in the shares table
 # For block confirmation, we have an option to send the block hash in
 # Please make sure your front end is compatible with the block hash in the solutions table.
-SOULTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the scrypt hash in the shares table
+SOLUTION_BLOCK_HASH = False # If enabled, send the block hash. If false send the scrypt hash in the shares table
 
 # ******************** Adv. DB Settings *********************
 #  Don't change these unless you know what you are doing

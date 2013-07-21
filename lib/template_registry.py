@@ -267,12 +267,12 @@ class TemplateRegistry(object):
             if on_submit:
                 self.update_block()
 
-            if settings.SOULTION_BLOCK_HASH:
+            if settings.SOLUTION_BLOCK_HASH:
                 return (header_hex, block_hash_hex, share_diff, on_submit)
             else:
                 return (header_hex, scrypt_hash_hex, share_diff, on_submit)
         
-        if settings.SOULTION_BLOCK_HASH:
+        if settings.SOLUTION_BLOCK_HASH:
         # Reverse the header and get the potential block hash (for scrypt only) only do this if we want to send in the block hash to the shares table
             block_hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
             block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
